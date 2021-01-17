@@ -1,9 +1,9 @@
 from typing import Iterable, Any
 
-from rite.render import RenderProtocol
-from rite.render.html import render_html
-from rite.render.markdown import render_markdown
-from rite.render.text import render_text
+from rite.backend import RenderProtocol
+from rite.backend.html import render_html
+from rite.backend.markdown import render_markdown
+from rite.backend.text import render_text
 from rite.richtext import String, Tag, TagType, Text, BaseText
 
 

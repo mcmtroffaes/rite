@@ -12,7 +12,6 @@ markdown_tags: Dict[TagType, Tuple[str, str]] = {
     TagType.SUPERSCRIPT: ('<sup>', '</sup>'),
 }
 
-
 # from https://enterprise.github.com/downloads/en/markdown-cheatsheet.pdf
 special_chars = r"\`*_{}[]()#+-.!"
 special_trans = str.maketrans(
