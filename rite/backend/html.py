@@ -17,7 +17,7 @@ def _string(text: String) -> Iterable[str]:
 @render_html.register(Tag)
 def _tag(text: Tag) -> Iterable[str]:
     yield f"<{text.tag.value}>"
-    yield render_html(text.text)
+    yield from render_html(text.text)
     yield f"</{text.tag.value}>"
 
 

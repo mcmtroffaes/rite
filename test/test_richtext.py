@@ -72,14 +72,14 @@ def test_join_list():
     sep2 = String(" and ")
     last_sep = String(", and ")
     other = String(" and others")
-    assert join_list([], sep=sep) == []
-    assert join_list([x1], sep=sep) == [x1]
-    assert join_list(xs[:2], sep=sep, sep2=sep2, last_sep=last_sep) == [
+    assert join_list(sep, []) == []
+    assert join_list(sep, [x1]) == [x1]
+    assert join_list(sep, xs[:2], sep2=sep2, last_sep=last_sep) == [
         String("one"),
         String(" and "),
         String("two"),
     ]
-    assert join_list(xs, sep=sep) == [
+    assert join_list(sep, xs) == [
         String("one"),
         String(", "),
         String("two"),
@@ -88,7 +88,7 @@ def test_join_list():
         String(", "),
         String("four"),
     ]
-    assert join_list(xs, sep=sep, sep2=sep2, last_sep=last_sep) == [
+    assert join_list(sep, xs, sep2=sep2, last_sep=last_sep) == [
         String("one"),
         String(", "),
         String("two"),
@@ -97,12 +97,12 @@ def test_join_list():
         String(", and "),
         String("four"),
     ]
-    assert join_list(xs[:2], sep=sep, sep2=sep2, other=other) == [
+    assert join_list(sep, xs[:2], sep2=sep2, other=other) == [
         String("one"),
         String(" and "),
         String("two"),
     ]
-    assert join_list(xs, sep=sep, sep2=sep2, other=other) == [
+    assert join_list(sep, xs, sep2=sep2, other=other) == [
         String("one"),
         String(" and others"),
     ]
