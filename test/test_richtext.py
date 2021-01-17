@@ -1,4 +1,4 @@
-from rite.richtext import String, Tag, TagType, Text, join_text, _join_list
+from rite.richtext import String, Tag, TagType, Text, join_list
 
 
 def test_string():
@@ -63,14 +63,6 @@ def test_tag_combined():
 
 
 def test_join_list():
-    assert list(_join_list([], 0)) == []
-    assert list(_join_list([1], 0)) == [1]
-    assert list(_join_list([1, 2], 0)) == [1, 0, 2]
-    assert list(_join_list([1, 2, 3], 0)) == [1, 0, 2, 0, 3]
-    assert list(_join_list([1, 2, 3, 4], 0)) == [1, 0, 2, 0, 3, 0, 4]
-
-
-def test_join_text():
     x1 = String("one")
     x2 = String("two")
     x3 = String("three")
@@ -80,7 +72,14 @@ def test_join_text():
     sep2 = String(" and ")
     last_sep = String(", and ")
     other = String(" and others")
-    assert join_text(xs, sep=sep) == Text([
+    assert join_list([], sep=sep) == []
+    assert join_list([x1], sep=sep) == [x1]
+    assert join_list(xs[:2], sep=sep, sep2=sep2, last_sep=last_sep) == [
+        String("one"),
+        String(" and "),
+        String("two"),
+    ]
+    assert join_list(xs, sep=sep) == [
         String("one"),
         String(", "),
         String("two"),
@@ -88,13 +87,8 @@ def test_join_text():
         String("three"),
         String(", "),
         String("four"),
-    ])
-    assert join_text(xs[:2], sep=sep, sep2=sep2, last_sep=last_sep) == Text([
-        String("one"),
-        String(" and "),
-        String("two"),
-    ])
-    assert join_text(xs, sep=sep, sep2=sep2, last_sep=last_sep) == Text([
+    ]
+    assert join_list(xs, sep=sep, sep2=sep2, last_sep=last_sep) == [
         String("one"),
         String(", "),
         String("two"),
@@ -102,8 +96,13 @@ def test_join_text():
         String("three"),
         String(", and "),
         String("four"),
-    ])
-    assert join_text(xs, other=other) == Text([
+    ]
+    assert join_list(xs[:2], sep=sep, sep2=sep2, other=other) == [
+        String("one"),
+        String(" and "),
+        String("two"),
+    ]
+    assert join_list(xs, sep=sep, sep2=sep2, other=other) == [
         String("one"),
         String(" and others"),
-    ])
+    ]

@@ -86,20 +86,22 @@ def _join_list(items: List[Any], sep: Any) -> List[Any]:
     return [elem for item in items for elem in (item, sep)][:-1]
 
 
-def join_text(
+def join_list(
+        sep: BaseText,
         parts: List[BaseText],
-        sep: BaseText = String(''),
         sep2: Optional[BaseText] = None,
         last_sep: Optional[BaseText] = None,
         other: Optional[BaseText] = None
-        ) -> BaseText:
-    if len(parts) <= 1:
-        return Text(parts)
+        ) -> List[BaseText]:
+    if not parts:
+        return []
+    elif len(parts) == 1:
+        return [parts[0]]
     elif len(parts) == 2:
-        return Text([parts[0], sep2 if sep2 is not None else sep, parts[1]])
+        return [parts[0], sep2 if sep2 is not None else sep, parts[1]]
     elif other is None:
-        return Text(
-            list(_join_list(parts[:-1], sep))
-            + [last_sep if last_sep is not None else sep, parts[-1]])
+        first = [text for part in parts[:-1] for text in (part, sep)][:-1]
+        last = [last_sep if last_sep is not None else sep, parts[-1]]
+        return first + last
     else:
-        return Text([parts[0], other])
+        return [parts[0], other]
