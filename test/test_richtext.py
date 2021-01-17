@@ -1,4 +1,4 @@
-from rite.richtext import String, Tag, TagType, Text
+from rite.richtext import String, Tag, TagType, Text, join_text, _join_list
 
 
 def test_string():
@@ -60,3 +60,50 @@ def test_tag_combined():
     assert x11.apply(str.upper) == x12
     assert x21.apply_start(str.upper) == x22
     assert x31.apply_end(str.upper) == x32
+
+
+def test_join_list():
+    assert list(_join_list([], 0)) == []
+    assert list(_join_list([1], 0)) == [1]
+    assert list(_join_list([1, 2], 0)) == [1, 0, 2]
+    assert list(_join_list([1, 2, 3], 0)) == [1, 0, 2, 0, 3]
+    assert list(_join_list([1, 2, 3, 4], 0)) == [1, 0, 2, 0, 3, 0, 4]
+
+
+def test_join_text():
+    x1 = String("one")
+    x2 = String("two")
+    x3 = String("three")
+    x4 = String("four")
+    xs = [x1, x2, x3, x4]
+    sep = String(", ")
+    sep2 = String(" and ")
+    last_sep = String(", and ")
+    other = String(" and others")
+    assert join_text(xs, sep=sep) == Text([
+        String("one"),
+        String(", "),
+        String("two"),
+        String(", "),
+        String("three"),
+        String(", "),
+        String("four"),
+    ])
+    assert join_text(xs[:2], sep=sep, sep2=sep2, last_sep=last_sep) == Text([
+        String("one"),
+        String(" and "),
+        String("two"),
+    ])
+    assert join_text(xs, sep=sep, sep2=sep2, last_sep=last_sep) == Text([
+        String("one"),
+        String(", "),
+        String("two"),
+        String(", "),
+        String("three"),
+        String(", and "),
+        String("four"),
+    ])
+    assert join_text(xs, other=other) == Text([
+        String("one"),
+        String(" and others"),
+    ])
