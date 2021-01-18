@@ -1,8 +1,9 @@
 import dataclasses
 import datetime
-try:
+import sys
+if sys.version_info >= (3, 8):
     from typing import Protocol
-except ImportError:
+else:
     from typing_extensions import Protocol
 
 from rite.backend.markdown import render_markdown

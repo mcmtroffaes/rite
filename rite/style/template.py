@@ -1,7 +1,8 @@
+import sys
 from typing import TypeVar, Optional, List
-try:
+if sys.version_info >= (3, 8):
     from typing import Protocol
-except ImportError:
+else:
     from typing_extensions import Protocol
 
 from rite.richtext import BaseText, String, Text, Tag, TagType
