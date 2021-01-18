@@ -6,7 +6,7 @@ from rite.richtext import BaseText, String, Tag, Text, text_map
 
 @singledispatch
 def render_html(text: BaseText) -> Iterable[str]:
-    yield from text_map(lambda x: x)
+    yield from text_map(text, lambda x: x)
 
 
 @render_html.register(Tag)
