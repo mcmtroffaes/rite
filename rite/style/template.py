@@ -1,8 +1,10 @@
 import string
 from typing import TypeVar, Protocol, Optional, List
 
-from rite.richtext import BaseText, String, Text, Tag, TagType, text_map, text_raw
-from rite.richtext import list_join, text_capfirst, text_lower, text_upper
+from rite.richtext import BaseText, String, Text, Tag, TagType
+from rite.richtext import (
+    list_join, text_raw, text_capfirst, text_lower, text_upper
+)
 
 Data = TypeVar('Data', contravariant=True)
 
