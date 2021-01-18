@@ -3,7 +3,7 @@ from typing import TypeVar, Protocol, Optional, List
 
 from rite.richtext import BaseText, String, Text, Tag, TagType
 from rite.richtext.utils import (
-    list_join, text_raw, text_capfirst, text_lower, text_upper
+    list_join, text_capfirst, text_lower, text_upper, text_capitalize,
 )
 
 Data = TypeVar('Data', contravariant=True)
@@ -12,7 +12,7 @@ Data = TypeVar('Data', contravariant=True)
 class Node(Protocol[Data]):
     """A node is any object that can convert data into rich text."""
     def __call__(self, data: Data) -> BaseText:
-        pass
+        pass  # pragma: no cover
 
 
 def str_(value: str) -> Node[Data]:
@@ -22,15 +22,8 @@ def str_(value: str) -> Node[Data]:
     return fmt
 
 
-def text(children: List[Node[Data]]) -> Node[Data]:
-    """A node which joins its *children*."""
-    def fmt(data: Data) -> BaseText:
-        return Text([child(data) for child in children])
-    return fmt
-
-
-def join(sep: BaseText,
-         children: List[Node[Data]],
+def join(children: List[Node[Data]],
+         sep: Optional[BaseText] = None,
          sep2: Optional[BaseText] = None,
          last_sep: Optional[BaseText] = None,
          other: Optional[BaseText] = None
@@ -38,8 +31,8 @@ def join(sep: BaseText,
     """A node which joins its *children* with the given separators."""
     def fmt(data: Data) -> BaseText:
         return Text(list_join(
-            sep, [child(data) for child in children],
-            sep2=sep2, last_sep=last_sep, other=other))
+            [child(data) for child in children],
+            sep=sep, sep2=sep2, last_sep=last_sep, other=other))
     return fmt
 
 
@@ -57,6 +50,13 @@ def capfirst(child: Node[Data]) -> Node[Data]:
     return fmt
 
 
+def capitalize(child: Node[Data]) -> Node[Data]:
+    """A node which capitalizes the first letter of its child."""
+    def fmt(data: Data) -> BaseText:
+        return text_capitalize(child(data))
+    return fmt
+
+
 def lower(child: Node[Data]) -> Node[Data]:
     """A node which converts its child to lower case."""
     def fmt(data: Data) -> BaseText:
@@ -68,19 +68,4 @@ def upper(child: Node[Data]) -> Node[Data]:
     """A node which converts its child to upper case."""
     def fmt(data: Data) -> BaseText:
         return text_upper(child(data))
-    return fmt
-
-
-def add_period(child: Node[Data]) -> Node[Data]:
-    """A node which adds appends period to its child, if the child does not
-    already end with a punctuation symbol.
-    """
-    chars = tuple(char for char in string.punctuation)
-
-    def fmt(data: Data) -> BaseText:
-        text = child(data)
-        if not text_raw(text).endswith(chars):
-            return Text([text, String(".")])
-        else:
-            return text
     return fmt

@@ -1,3 +1,4 @@
+import string
 from itertools import repeat, takewhile
 from typing import Callable, TypeVar, Iterable, List, Optional, Iterator
 
@@ -72,15 +73,18 @@ def text_capfirst(text: BaseText) -> BaseText:
     return text.functor_map_iter(funcs())
 
 
+_punctuation_chars = tuple(char for char in string.punctuation)
+
+
 def list_join(
-        sep: T,
         parts: List[T],
+        sep: Optional[T] = None,
         sep2: Optional[T] = None,
         last_sep: Optional[T] = None,
         other: Optional[T] = None
         ) -> List[T]:
-    if not parts:
-        return []
+    if sep is None or not parts:
+        return parts
     elif len(parts) == 1:
         return [parts[0]]
     elif len(parts) == 2:

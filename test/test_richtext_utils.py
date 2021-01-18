@@ -3,8 +3,11 @@ from typing import Callable, List, Dict
 import pytest
 
 from rite.richtext import String, Text, Tag, TagType, BaseText
-from rite.richtext.utils import list_join, text_map, text_functor_map, text_raw, text_is_empty, text_is_lower, \
-    text_is_upper, text_lower, text_upper, text_capitalize, text_capfirst
+from rite.richtext.utils import (
+    list_join, text_map, text_functor_map, text_raw, text_is_empty,
+    text_is_lower, text_is_upper, text_lower, text_upper,
+    text_capitalize, text_capfirst,
+)
 
 
 # helper function for constructing test cases
@@ -117,27 +120,29 @@ def test_text_capfirst(text: BaseText, result: BaseText):
 
 @pytest.mark.parametrize("inputs,outputs,kwargs", [
     ([], [], {}),
-    (["one"], ["one"], {}),
-    (["one", "two"], ["one", " and ", "two"], dict(sep2=" and ")),
+    (["one", "two", "three", "four"], ["one", "two", "three", "four"], {}),
+    ([], [], dict(sep=", ")),
+    (["one"], ["one"], dict(sep=", ")),
+    (["one", "two"], ["one", " and ", "two"], dict(sep=", ", sep2=" and ")),
     (
         ["one", "two", "three", "four"],
-        ["one", ", ", "two", ", ", "three", ", ", "four"], {}
+        ["one", ", ", "two", ", ", "three", ", ", "four"], dict(sep=", ")
     ),
     (
         ["one", "two", "three", "four"],
         ["one", ", ", "two", ", ", "three", ", and ", "four"],
-        dict(sep2=" and ", last_sep=", and ")
+        dict(sep=", ", sep2=" and ", last_sep=", and ")
     ),
     (
         ["one", "two"],
         ["one", " and ", "two"],
-        dict(sep2=" and ", other=" and others")
+        dict(sep=", ", sep2=" and ", other=" and others")
     ),
     (
         ["one", "two", "three", "four"],
         ["one", " and others"],
-        dict(sep2=" and ", other=" and others")
+        dict(sep=", ", sep2=" and ", other=" and others")
     ),
 ])
 def test_list_join(inputs: List[str], outputs: List[str], kwargs: Dict[str, str]):
-    assert list_join(", ", inputs, **kwargs) == outputs
+    assert list_join(inputs, **kwargs) == outputs

@@ -7,4 +7,4 @@ RenderType = TypeVar('RenderType', covariant=True)
 
 class RenderProtocol(Protocol[RenderType]):
     def __call__(self, text: BaseText) -> Iterable[RenderType]:
-        pass
+        pass  # pragma: no cover
