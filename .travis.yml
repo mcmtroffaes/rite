@@ -7,7 +7,7 @@ jobs:
   - python: "3.6"
 branches:
   only:
-    - master
+    - develop
 install:
   - "pip install codecov pytest coverage"
   - "pip install ."
