@@ -56,7 +56,8 @@ def text_capitalize(text: BaseText) -> BaseText:
 
 def text_capfirst(text: BaseText) -> BaseText:
     def _capfirst(value: str) -> str:
-        return value[0].upper() + value[1]
+        assert value  # this is guaranteed by the funcs code below
+        return value[0].upper() + value[1:]
 
     def funcs() -> Iterator[Callable[[str], str]]:
         # iterate until a non-empty string is found
