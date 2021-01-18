@@ -40,28 +40,6 @@ class String(BaseText):
         return String(next(funcs)(self.value))
 
 
-class TagType(Enum):
-    """Rich text tags. Values are html tags."""
-    EMPHASIZE = 'em'
-    STRONG = 'strong'
-    CODE = 'code'
-    SUPERSCRIPT = 'sup'
-    SUBSCRIPT = 'sub'
-
-
-@dataclasses.dataclass(frozen=True)
-class Tag(BaseText):
-    tag: TagType
-    text: BaseText
-
-    def map_iter(self, funcs: Iterator[Callable[[str], T]]) -> Iterable[T]:
-        yield from self.text.map_iter(funcs)
-
-    def functor_map_iter(
-            self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
-        return Tag(self.tag, self.text.functor_map_iter(funcs))
-
-
 @dataclasses.dataclass(frozen=True)
 class Text(BaseText):
     parts: List[BaseText]
@@ -84,3 +62,25 @@ class Protected(Text):
     def functor_map_iter(
             self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
         return self
+
+
+class TagType(Enum):
+    """Rich text tags. Values are html tags."""
+    EMPHASIZE = 'em'
+    STRONG = 'strong'
+    CODE = 'code'
+    SUPERSCRIPT = 'sup'
+    SUBSCRIPT = 'sub'
+
+
+@dataclasses.dataclass(frozen=True)
+class Tag(BaseText):
+    tag: TagType
+    text: BaseText
+
+    def map_iter(self, funcs: Iterator[Callable[[str], T]]) -> Iterable[T]:
+        yield from self.text.map_iter(funcs)
+
+    def functor_map_iter(
+            self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
+        return Tag(self.tag, self.text.functor_map_iter(funcs))
