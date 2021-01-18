@@ -8,6 +8,7 @@ def readfile(filename):
 
 
 doclines = readfile("README.rst")
+requires = readfile("requirements.txt")
 version = readfile("VERSION")[0].strip()
 
 setup(
@@ -45,4 +46,5 @@ setup(
     platforms='any',
     packages=find_packages(),
     python_requires='>=3.6',
+    install_requires=requires,
 )

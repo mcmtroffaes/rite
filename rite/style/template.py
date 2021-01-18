@@ -1,4 +1,8 @@
-from typing import TypeVar, Protocol, Optional, List
+from typing import TypeVar, Optional, List
+try:
+    from typing import Protocol
+except ImportError:
+    from typing_extensions import Protocol
 
 from rite.richtext import BaseText, String, Text, Tag, TagType
 from rite.richtext.utils import (

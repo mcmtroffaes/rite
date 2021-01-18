@@ -1,6 +1,9 @@
 import dataclasses
 import datetime
-from typing import Protocol
+try:
+    from typing import Protocol
+except ImportError:
+    from typing_extensions import Protocol
 
 from rite.backend.markdown import render_markdown
 from rite.richtext import BaseText, String, TagType, Tag, Text
