@@ -1,4 +1,4 @@
-from typing import TypeVar, Protocol, Iterable, runtime_checkable
+from typing import TypeVar, Protocol, Iterable
 from rite.richtext import BaseText
 
 

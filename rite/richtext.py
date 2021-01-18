@@ -1,7 +1,9 @@
 import dataclasses
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Callable, List, Iterable, Any, Optional
+from typing import Callable, List, Any, Optional, TypeVar, Iterable
+
+T = TypeVar('T')
 
 
 class BaseText(ABC):
@@ -16,8 +18,8 @@ class BaseText(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def apply_end(self, func: Callable[[str], str]) -> "BaseText":
-        """Apply a function to the last string in the text."""
+    def apply_iter(self, func: Callable[[str], T]) -> Iterable[T]:
+        """Apply a function to every string in the text."""
         raise NotImplementedError
 
 
@@ -31,8 +33,8 @@ class String(BaseText):
     def apply_start(self, func: Callable[[str], str]) -> BaseText:
         return self.apply(func)
 
-    def apply_end(self, func: Callable[[str], str]) -> BaseText:
-        return self.apply(func)
+    def apply_iter(self, func: Callable[[str], T]) -> Iterable[T]:
+        yield func(self.value)
 
 
 class TagType(Enum):
@@ -55,8 +57,8 @@ class Tag(BaseText):
     def apply_start(self, func: Callable[[str], str]) -> BaseText:
         return Tag(self.tag, self.text.apply_start(func))
 
-    def apply_end(self, func: Callable[[str], str]) -> BaseText:
-        return Tag(self.tag, self.text.apply_end(func))
+    def apply_iter(self, func: Callable[[str], T]) -> Iterable[T]:
+        yield from self.text.apply_iter(func)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -67,23 +69,52 @@ class Text(BaseText):
         return Text([part.apply(func) for part in self.parts])
 
     def apply_start(self, func: Callable[[str], str]) -> BaseText:
-        old_part = self.parts[0]
-        if isinstance(old_part, Text):
-            return Text([old_part.apply_start(func)] + self.parts[1:])
+        tail = (part for part in self.parts)
+        head = next(tail, None)
+        if head is None:
+            return self
+        elif isinstance(head, Text):
+            return Text([head.apply_start(func)] + list(tail))
         else:
-            return Text([old_part.apply(func)] + self.parts[1:])
+            return Text([head.apply(func)] + list(tail))
 
-    def apply_end(self, func: Callable[[str], str]) -> BaseText:
-        old_part = self.parts[-1]
-        if isinstance(old_part, Text):
-            new_part = old_part.apply_end(func)
-        else:
-            new_part = old_part.apply(func)
-        return Text(self.parts[:-1] + [new_part])
+    def apply_iter(self, func: Callable[[str], T]) -> Iterable[T]:
+        for part in self.parts:
+            yield from part.apply_iter(func)
 
 
-def _join_list(items: List[Any], sep: Any) -> List[Any]:
-    return [elem for item in items for elem in (item, sep)][:-1]
+@dataclasses.dataclass(frozen=True)
+class Protected(Text):
+
+    def apply(self, func: Callable[[str], str]) -> BaseText:
+        return self
+
+    def apply_start(self, func: Callable[[str], str]) -> BaseText:
+        return self
+
+
+def is_empty(text: BaseText) -> bool:
+    return not any(text.apply_iter(bool))
+
+
+def is_upper(text: BaseText) -> bool:
+    return all(text.apply_iter(str.isupper))
+
+
+def is_lower(text: BaseText) -> bool:
+    return all(text.apply_iter(str.islower))
+
+
+def upper(text: BaseText) -> BaseText:
+    return text.apply(str.upper)
+
+
+def lower(text: BaseText) -> BaseText:
+    return text.apply(str.lower)
+
+
+def capitalize(text: BaseText) -> BaseText:
+    return text.apply(str.lower).apply_start(str.capitalize)
 
 
 def join_list(
@@ -100,8 +131,9 @@ def join_list(
     elif len(parts) == 2:
         return [parts[0], sep2 if sep2 is not None else sep, parts[1]]
     elif other is None:
-        first = [text for part in parts[:-1] for text in (part, sep)][:-1]
-        last = [last_sep if last_sep is not None else sep, parts[-1]]
+        _last_sep: BaseText = last_sep if last_sep is not None else sep
+        first = [text for part in parts[:-2] for text in [part, sep]]
+        last = [parts[-2], _last_sep, parts[-1]]
         return first + last
     else:
         return [parts[0], other]
