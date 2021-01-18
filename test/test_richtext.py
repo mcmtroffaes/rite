@@ -1,6 +1,7 @@
 from itertools import repeat
 
-from rite.richtext import String, Tag, TagType, Text, list_join
+from rite.richtext import String, Tag, TagType, Text
+from rite.richtext.utils import list_join
 
 
 def test_string():

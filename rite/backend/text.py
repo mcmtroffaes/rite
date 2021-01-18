@@ -1,6 +1,7 @@
 from typing import Iterable
 
-from rite.richtext import BaseText, text_map
+from rite.richtext import BaseText
+from rite.richtext.utils import text_map
 
 
 def render_text(text: BaseText) -> Iterable[str]:

@@ -1,7 +1,8 @@
 from functools import singledispatch
 from typing import Iterable
 
-from rite.richtext import BaseText, Tag, Text, text_map
+from rite.richtext import BaseText, Tag, Text
+from rite.richtext.utils import text_map
 
 
 @singledispatch

@@ -2,7 +2,7 @@ import string
 from typing import TypeVar, Protocol, Optional, List
 
 from rite.richtext import BaseText, String, Text, Tag, TagType
-from rite.richtext import (
+from rite.richtext.utils import (
     list_join, text_raw, text_capfirst, text_lower, text_upper
 )
 
