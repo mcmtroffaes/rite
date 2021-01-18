@@ -68,7 +68,7 @@ class Protected(BaseText):
 
 class TagType(Enum):
     """Rich text tags. Values are html tags."""
-    EMPHASIZE = 'em'
+    EMPHASIS = 'em'
     STRONG = 'strong'
     CODE = 'code'
     SUPERSCRIPT = 'sup'

@@ -4,6 +4,7 @@ from rite.backends import RenderProtocol
 from rite.backends.html import render_html
 from rite.backends.markdown import render_markdown
 from rite.backends.plaintext import render_plaintext
+from rite.backends.rst import render_rst
 from rite.richtext import String, Tag, TagType, Text, BaseText
 
 
@@ -12,10 +13,12 @@ def test_protocol() -> None:
     render_html_protocol: RenderProtocol[str] = render_html
     render_text_protocol: RenderProtocol[str] = render_plaintext
     render_markdown_protocol: RenderProtocol[str] = render_markdown
+    render_rst_protocol: RenderProtocol[str] = render_rst
     s = Tag(TagType.CODE, String('xmas'))
     assert ''.join(render_html_protocol(s)) == '<code>xmas</code>'
     assert ''.join(render_text_protocol(s)) == 'xmas'
     assert ''.join(render_markdown_protocol(s)) == '`xmas`'
+    assert ''.join(render_rst_protocol(s)) == '``xmas``'
 
 
 def test_protocol_class() -> None:
@@ -49,6 +52,7 @@ def test_hello_brave_world() -> None:
     assert ''.join(render_plaintext(s)) == 'hello brave world!'
     assert ''.join(render_html(s)) == 'hello <strong>brave</strong> world!'
     assert ''.join(render_markdown(s)) == r'hello **brave** world\!'
+    assert ''.join(render_rst(s)) == r'hello **brave** world!'
 
 
 def test_escape() -> None:
@@ -59,3 +63,4 @@ def test_escape() -> None:
     assert ''.join(render_html(s)) == \
            'hello <strong>&quot;&lt;[*]&gt;&quot;</strong> world!'
     assert ''.join(render_markdown(s)) == r'hello **"<\[\*\]>"** world\!'
+    assert ''.join(render_rst(s)) == r'hello **"<[\*]>"** world!'

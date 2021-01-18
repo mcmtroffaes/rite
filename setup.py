@@ -37,10 +37,8 @@ setup(
         'Topic :: Text Editors :: Text Processing',
         'Topic :: Text Processing :: Markup',
         'Topic :: Text Processing :: Markup :: HTML',
-        'Topic :: Text Processing :: Markup :: LaTeX',
         'Topic :: Text Processing :: Markup :: Markdown',
         'Topic :: Text Processing :: Markup :: reStructuredText',
-        'Topic :: Text Processing :: Markup :: XML',
         'Typing :: Typed',
     ],
     platforms='any',
@@ -52,6 +50,7 @@ setup(
             'html = rite.backends.html:render_html',
             'markdown = rite.backends.html:render_markdown',
             'plaintext = rite.backends.html:render_plaintext',
+            'rst = rite.backends.html:render_rst',
         ],
     }
 )

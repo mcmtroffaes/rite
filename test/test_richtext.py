@@ -18,11 +18,11 @@ def test_text():
 
 
 def test_tag():
-    x = Tag(TagType.EMPHASIZE, String('hello'))
+    x = Tag(TagType.EMPHASIS, String('hello'))
     assert list(x.map_iter(repeat(str.capitalize))) \
            == ['Hello']
     assert x.functor_map_iter(repeat(str.capitalize)) \
-           == Tag(TagType.EMPHASIZE, String('Hello'))
+           == Tag(TagType.EMPHASIS, String('Hello'))
 
 
 def test_protected():
@@ -46,9 +46,9 @@ def test_text_combined():
 def test_tag_combined():
     s1 = String('hello')
     s2 = String('HELLO')
-    x11 = Tag(TagType.EMPHASIZE, s1)
-    x21 = Tag(TagType.EMPHASIZE, Tag(TagType.STRONG, s1))
-    x12 = Tag(TagType.EMPHASIZE, s2)
-    x22 = Tag(TagType.EMPHASIZE, Tag(TagType.STRONG, s2))
+    x11 = Tag(TagType.EMPHASIS, s1)
+    x21 = Tag(TagType.EMPHASIS, Tag(TagType.STRONG, s1))
+    x12 = Tag(TagType.EMPHASIS, s2)
+    x22 = Tag(TagType.EMPHASIS, Tag(TagType.STRONG, s2))
     assert x11.functor_map_iter(repeat(str.upper)) == x12
     assert x21.functor_map_iter(repeat(str.upper)) == x22

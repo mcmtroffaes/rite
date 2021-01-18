@@ -76,7 +76,7 @@ def test_template() -> None:
 
 def test_protocol() -> None:
     template: Node[PersonProtocol] = join([
-        tag(TagType.EMPHASIZE, name()),
+        tag(TagType.EMPHASIS, name()),
         str_(': '),
         tag(TagType.STRONG, birthday("%b %d, %Y"))])
     person1 = Person(
@@ -87,11 +87,11 @@ def test_protocol() -> None:
     text1 = template(person1)
     text2 = template(person2)
     assert text1 == Text([
-        Tag(TagType.EMPHASIZE, _s('John')),
+        Tag(TagType.EMPHASIS, _s('John')),
         _s(': '),
         Tag(TagType.STRONG, _s('Mar 07, 1998'))])
     assert text2 == Text([
-        Tag(TagType.EMPHASIZE, _s('Mary')),
+        Tag(TagType.EMPHASIS, _s('Mary')),
         _s(': '),
         Tag(TagType.STRONG, _s('Jun 22, 1997'))])
 
