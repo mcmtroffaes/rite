@@ -4,5 +4,5 @@ from rite.richtext import BaseText
 from rite.richtext.utils import text_strings
 
 
-def render_text(text: BaseText) -> Iterable[str]:
+def render_plaintext(text: BaseText) -> Iterable[str]:
     yield from text_strings(text)
