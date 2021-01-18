@@ -1,0 +1,22 @@
+language: python
+jobs:
+  include:
+  - python: "3.9"
+  - python: "3.8"
+  - python: "3.7"
+  - python: "3.6"
+branches:
+  only:
+    - master
+install:
+  - "pip install codecov pytest coverage"
+  - "pip install ."
+  - "if [[ $TRAVIS_PYTHON_VERSION == '3.9' ]]; then pip install check-manifest flake8; fi"
+script:
+  - "if [[ $TRAVIS_PYTHON_VERSION == '3.9' ]]; then check-manifest; fi"
+  - "if [[ $TRAVIS_PYTHON_VERSION == '3.9' ]]; then flake8; fi"
+  - "coverage run -m pytest"
+after_success:
+  - "pushd test"
+  - "codecov"
+  - "popd"
