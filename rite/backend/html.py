@@ -1,4 +1,5 @@
 from functools import singledispatch
+from html import escape
 from typing import Iterable
 
 from rite.richtext import BaseText, Tag, Text
@@ -7,7 +8,7 @@ from rite.richtext.utils import text_map
 
 @singledispatch
 def render_html(text: BaseText) -> Iterable[str]:
-    yield from text_map(text, lambda x: x)
+    yield from text_map(text, escape)
 
 
 @render_html.register(Tag)

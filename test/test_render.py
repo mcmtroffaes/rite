@@ -49,3 +49,13 @@ def test_hello_brave_world() -> None:
     assert ''.join(render_text(s)) == 'hello brave world!'
     assert ''.join(render_html(s)) == 'hello <strong>brave</strong> world!'
     assert ''.join(render_markdown(s)) == r'hello **brave** world\!'
+
+
+def test_escape() -> None:
+    s = Text([String('hello '),
+              Tag(TagType.STRONG, String('"<[*]>"')),
+              String(' world!')])
+    assert ''.join(render_text(s)) == 'hello "<[*]>" world!'
+    assert ''.join(render_html(s)) == \
+           'hello <strong>&quot;&lt;[*]&gt;&quot;</strong> world!'
+    assert ''.join(render_markdown(s)) == r'hello **"<\[\*\]>"** world\!'

@@ -24,12 +24,7 @@ def escape(value: str) -> str:
 
 @singledispatch
 def render_markdown(text: BaseText) -> Iterable[str]:
-    yield from text_map(text, lambda x: x)
-
-
-@render_markdown.register(String)
-def _string(text: String) -> Iterable[str]:
-    yield f"{escape(text.value)}"
+    yield from text_map(text, escape)
 
 
 @render_markdown.register(Tag)
