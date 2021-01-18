@@ -1,48 +1,75 @@
-from rite.richtext import String
-from rite.richtext.utils import list_join
+from typing import Callable, List, Dict
+
+import pytest
+
+from rite.richtext import String, Text, Tag, TagType, BaseText
+from rite.richtext.utils import list_join, text_map, text_functor_map, text_raw, text_is_empty
 
 
-def test_list_join():
-    x1 = String("one")
-    x2 = String("two")
-    x3 = String("three")
-    x4 = String("four")
-    xs = [x1, x2, x3, x4]
-    sep = String(", ")
-    sep2 = String(" and ")
-    last_sep = String(", and ")
-    other = String(" and others")
-    assert list_join(sep, []) == []
-    assert list_join(sep, [x1]) == [x1]
-    assert list_join(sep, xs[:2], sep2=sep2, last_sep=last_sep) == [
-        String("one"),
-        String(" and "),
-        String("two"),
-    ]
-    assert list_join(sep, xs) == [
-        String("one"),
-        String(", "),
-        String("two"),
-        String(", "),
-        String("three"),
-        String(", "),
-        String("four"),
-    ]
-    assert list_join(sep, xs, sep2=sep2, last_sep=last_sep) == [
-        String("one"),
-        String(", "),
-        String("two"),
-        String(", "),
-        String("three"),
-        String(", and "),
-        String("four"),
-    ]
-    assert list_join(sep, xs[:2], sep2=sep2, other=other) == [
-        String("one"),
-        String(" and "),
-        String("two"),
-    ]
-    assert list_join(sep, xs, sep2=sep2, other=other) == [
-        String("one"),
-        String(" and others"),
-    ]
+@pytest.mark.parametrize(
+    "text,func,result_map,result_functor_map,result_raw", [
+        (
+            Text([
+                String("one "),
+                Tag(TagType.STRONG, String("two")),
+                String(" three"),
+            ]),
+            lambda x: "*" + x + "*",
+            ['*one *', '*two*', '* three*'],
+            Text([
+                String("*one *"),
+                Tag(TagType.STRONG, String("*two*")),
+                String("* three*"),
+            ]),
+            'one two three',
+        ),
+])
+def test_text_map(
+        text: BaseText, func: Callable[[str], str],
+        result_map: List[str], result_functor_map: BaseText,
+        result_raw: str
+):
+    assert list(text_map(text, func)) == result_map
+    assert text_functor_map(text, func) == result_functor_map
+    assert text_raw(text) == result_raw
+
+
+@pytest.mark.parametrize("text,is_empty", [
+    (String(''), True),
+    (String('hello'), False),
+    (Tag(TagType.CODE, String('')), True),
+    (Tag(TagType.CODE, String('hello')), False),
+    (Text([]), True),
+    (Text([String('')]), True),
+    (Text([String(''), String('hello')]), False),
+])
+def test_text_is_empty(text: BaseText, is_empty: bool):
+    assert text_is_empty(text) is is_empty
+
+
+@pytest.mark.parametrize("inputs,outputs,kwargs", [
+    ([], [], {}),
+    (["one"], ["one"], {}),
+    (["one", "two"], ["one", " and ", "two"], dict(sep2=" and ")),
+    (
+        ["one", "two", "three", "four"],
+        ["one", ", ", "two", ", ", "three", ", ", "four"], {}
+    ),
+    (
+        ["one", "two", "three", "four"],
+        ["one", ", ", "two", ", ", "three", ", and ", "four"],
+        dict(sep2=" and ", last_sep=", and ")
+    ),
+    (
+        ["one", "two"],
+        ["one", " and ", "two"],
+        dict(sep2=" and ", other=" and others")
+    ),
+    (
+        ["one", "two", "three", "four"],
+        ["one", " and others"],
+        dict(sep2=" and ", other=" and others")
+    ),
+])
+def test_list_join(inputs: List[str], outputs: List[str], kwargs: Dict[str, str]):
+    assert list_join(", ", inputs, **kwargs) == outputs

@@ -31,7 +31,7 @@ def test_protocol_bad_arg() -> None:
     def render(text: int) -> Iterable[int]:
         yield 123
     render_protocol: RenderProtocol[float] = render  # type: ignore
-    assert list(render_protocol(1)) == [123]
+    assert list(render_protocol(1)) == [123]  # type: ignore
 
 
 # should fail mypy
@@ -39,7 +39,7 @@ def test_protocol_bad_rt() -> None:
     def render(text: BaseText) -> Iterable[int]:
         yield 123
     render_protocol: RenderProtocol[str] = render  # type: ignore
-    assert list(render_protocol(String(''))) == [123]
+    assert list(render_protocol(String(''))) == [123]  # type: ignore
 
 
 def test_hello_brave_world() -> None:

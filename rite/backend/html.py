@@ -1,9 +1,14 @@
+import html
+
 from functools import singledispatch
-from html import escape
 from typing import Iterable
 
 from rite.richtext import BaseText, Tag, Text
 from rite.richtext.utils import text_map
+
+
+def escape(value: str) -> str:
+    return html.escape(value)
 
 
 @singledispatch
