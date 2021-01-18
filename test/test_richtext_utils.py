@@ -29,7 +29,7 @@ def _t(value: str) -> Tag:
             Text([_s("*one *"), _t("*two*"), _s("* three*")]),
             'one two three',
         ),
-])
+    ])
 def test_text_map(
         text: BaseText, func: Callable[[str], str],
         result_map: List[str], result_functor_map: BaseText,
