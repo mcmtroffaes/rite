@@ -54,10 +54,12 @@ class Text(BaseText):
 
 
 @dataclasses.dataclass(frozen=True)
-class Protected(Text):
-    """Like text but protected against content changes through
-    :meth:`functor_map_iter`.
-    """
+class Protected(BaseText):
+    """Protected against content changes through :meth:`functor_map_iter`."""
+    child: BaseText
+
+    def map_iter(self, funcs: Iterator[Callable[[str], T]]) -> Iterable[T]:
+        yield from self.child.map_iter(funcs)
 
     def functor_map_iter(
             self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
