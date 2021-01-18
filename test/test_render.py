@@ -22,24 +22,24 @@ def test_protocol_class() -> None:
     class Render:
         def __call__(self, text: BaseText) -> Iterable[int]:
             yield 123
-    render_123_protocol: RenderProtocol[int] = Render()
-    assert list(render_123_protocol(String(''))) == [123]
+    render_protocol: RenderProtocol[int] = Render()
+    assert list(render_protocol(String(''))) == [123]
 
 
 # should fail mypy
-def test_protocol_bad_arg() -> Any:
+def test_protocol_bad_arg() -> None:
     def render(text: int) -> Iterable[int]:
         yield 123
     render_protocol: RenderProtocol[float] = render  # type: ignore
-    return render_protocol
+    assert list(render_protocol(1)) == [123]
 
 
 # should fail mypy
-def test_protocol_bad_rt() -> Any:
+def test_protocol_bad_rt() -> None:
     def render(text: BaseText) -> Iterable[int]:
         yield 123
     render_protocol: RenderProtocol[str] = render  # type: ignore
-    return render_protocol
+    assert list(render_protocol(String(''))) == [123]
 
 
 def test_hello_brave_world() -> None:

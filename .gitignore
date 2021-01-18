@@ -1,7 +1,9 @@
 *.pyc
 *~
+.coverage
 venv/
 .idea/
 *.egg-info/
 .pytest_cache/
 .mypy_cache/
+htmlcov/
