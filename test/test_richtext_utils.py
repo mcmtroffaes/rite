@@ -92,6 +92,7 @@ def test_text_lower_upper(text: BaseText, lower: BaseText, upper: BaseText):
 
 
 @pytest.mark.parametrize("text,result", [
+    (Text([]), Text([])),
     (_s(''), _s('')),
     (_s('heLLO'), _s('Hello')),
     (_t('heLLO'), _t('Hello')),
@@ -103,6 +104,7 @@ def test_text_capitalize(text: BaseText, result: BaseText):
 
 
 @pytest.mark.parametrize("text,result", [
+    (Text([]), Text([])),
     (_s(''), _s('')),
     (_s('heLLO'), _s('HeLLO')),
     (_t('heLLO'), _t('HeLLO')),
