@@ -6,7 +6,6 @@ if sys.version_info >= (3, 8):
 else:
     from typing_extensions import Protocol
 
-from rite.backend.markdown import render_markdown
 from rite.richtext import BaseText, String, TagType, Tag, Text
 from rite.style.template import (
     Node, tag, str_, join, capfirst, capitalize, lower, upper
@@ -95,8 +94,6 @@ def test_protocol() -> None:
         Tag(TagType.EMPHASIZE, _s('Mary')),
         _s(': '),
         Tag(TagType.STRONG, _s('Jun 22, 1997'))])
-    assert ''.join(render_markdown(text1)) == "*John*: **Mar 07, 1998**"
-    assert ''.join(render_markdown(text2)) == "*Mary*: **Jun 22, 1997**"
 
 
 def test_capfirst():
