@@ -17,6 +17,4 @@ script:
   - "if [[ $TRAVIS_PYTHON_VERSION == '3.9' ]]; then flake8; fi"
   - "coverage run -m pytest"
 after_success:
-  - "pushd test"
   - "codecov"
-  - "popd"
