@@ -23,7 +23,7 @@ setup(
     long_description="\n".join(doclines[2:]),
     zip_safe=False,
     classifiers=[
-        'Development Status :: 1 - Planning',
+        'Development Status :: 2 - Pre-Alpha',
         'Environment :: Console',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
