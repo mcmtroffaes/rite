@@ -1,4 +1,4 @@
-| rite is a rich text template engine
+| rite is an extensible rich text template engine
 | Copyright (c) 2021 by Matthias C. M. Troffaes
 | All rights reserved.
 
