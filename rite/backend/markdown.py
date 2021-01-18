@@ -1,8 +1,7 @@
 from functools import singledispatch
 from typing import Iterable, Dict, Tuple
 
-from rite.richtext import BaseText, String, Tag, Text, TagType
-
+from rite.richtext import BaseText, String, Tag, Text, TagType, text_map
 
 markdown_tags: Dict[TagType, Tuple[str, str]] = {
     TagType.EMPHASIZE: ('*', '*'),
@@ -24,7 +23,7 @@ def escape(value: str) -> str:
 
 @singledispatch
 def render_markdown(text: BaseText) -> Iterable[str]:
-    raise TypeError(f'rendering {type(text)} to markdown is not implemented')
+    yield from text_map(text, lambda x: x)
 
 
 @render_markdown.register(String)

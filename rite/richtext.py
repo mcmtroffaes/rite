@@ -1,25 +1,31 @@
 import dataclasses
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Callable, List, Any, Optional, TypeVar, Iterable
+from itertools import repeat
+from typing import Callable, List, Optional, TypeVar, Iterable, Iterator
 
 T = TypeVar('T')
 
 
 class BaseText(ABC):
+    """Rich text is a collection of strings with some additional formatting
+    attached to it.
+    """
+
     @abstractmethod
-    def apply(self, func: Callable[[str], str]) -> "BaseText":
-        """Apply a function to every string in the text."""
+    def map_iter(self, funcs: Iterator[Callable[[str], T]]) -> Iterable[T]:
+        """Apply iterator *funcs* of functions consecutively to each string
+        in the text and return the results.
+        """
         raise NotImplementedError
 
     @abstractmethod
-    def apply_start(self, func: Callable[[str], str]) -> "BaseText":
-        """Apply a function to the first string in the text."""
-        raise NotImplementedError
-
-    @abstractmethod
-    def apply_iter(self, func: Callable[[str], T]) -> Iterable[T]:
-        """Apply a function to every string in the text."""
+    def functor_map_iter(
+            self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
+        """Apply the iterator *funcs* of functions consecutively to each string
+        in the text and return the resulting rich text, retaining the original
+        markup.
+        """
         raise NotImplementedError
 
 
@@ -27,14 +33,12 @@ class BaseText(ABC):
 class String(BaseText):
     value: str
 
-    def apply(self, func: Callable[[str], str]) -> BaseText:
-        return String(func(self.value))
+    def map_iter(self, funcs: Iterator[Callable[[str], T]]) -> Iterable[T]:
+        yield next(funcs)(self.value)
 
-    def apply_start(self, func: Callable[[str], str]) -> BaseText:
-        return self.apply(func)
-
-    def apply_iter(self, func: Callable[[str], T]) -> Iterable[T]:
-        yield func(self.value)
+    def functor_map_iter(
+            self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
+        return String(next(funcs)(self.value))
 
 
 class TagType(Enum):
@@ -51,79 +55,112 @@ class Tag(BaseText):
     tag: TagType
     text: BaseText
 
-    def apply(self, func: Callable[[str], str]) -> BaseText:
-        return Tag(self.tag, self.text.apply(func))
+    def map_iter(self, funcs: Iterator[Callable[[str], T]]) -> Iterable[T]:
+        yield from self.text.map_iter(funcs)
 
-    def apply_start(self, func: Callable[[str], str]) -> BaseText:
-        return Tag(self.tag, self.text.apply_start(func))
-
-    def apply_iter(self, func: Callable[[str], T]) -> Iterable[T]:
-        yield from self.text.apply_iter(func)
+    def functor_map_iter(
+            self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
+        return Tag(self.tag, self.text.functor_map_iter(funcs))
 
 
 @dataclasses.dataclass(frozen=True)
 class Text(BaseText):
     parts: List[BaseText]
 
-    def apply(self, func: Callable[[str], str]) -> BaseText:
-        return Text([part.apply(func) for part in self.parts])
-
-    def apply_start(self, func: Callable[[str], str]) -> BaseText:
-        tail = (part for part in self.parts)
-        head = next(tail, None)
-        if head is None:
-            return self
-        elif isinstance(head, Text):
-            return Text([head.apply_start(func)] + list(tail))
-        else:
-            return Text([head.apply(func)] + list(tail))
-
-    def apply_iter(self, func: Callable[[str], T]) -> Iterable[T]:
+    def map_iter(self, funcs: Iterator[Callable[[str], T]]) -> Iterable[T]:
         for part in self.parts:
-            yield from part.apply_iter(func)
+            yield from part.map_iter(funcs)
+
+    def functor_map_iter(
+            self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
+        return Text([part.functor_map_iter(funcs) for part in self.parts])
 
 
 @dataclasses.dataclass(frozen=True)
 class Protected(Text):
+    """Like text but protected against content changes through
+    :meth:`functor_map_iter`.
+    """
 
-    def apply(self, func: Callable[[str], str]) -> BaseText:
+    def functor_map_iter(
+            self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
         return self
 
-    def apply_start(self, func: Callable[[str], str]) -> BaseText:
-        return self
+
+def text_map(text: BaseText, func: Callable[[str], T]) -> Iterable[T]:
+    return text.map_iter(repeat(func))
 
 
-def is_empty(text: BaseText) -> bool:
-    return not any(text.apply_iter(bool))
+def text_functor_map(
+        text: BaseText, func: Callable[[str], str]) -> BaseText:
+    return text.functor_map_iter(repeat(func))
 
 
-def is_upper(text: BaseText) -> bool:
-    return all(text.apply_iter(str.isupper))
+def text_raw(text: BaseText) -> str:
+    return ''.join(text_map(text, lambda x: x))
 
 
-def is_lower(text: BaseText) -> bool:
-    return all(text.apply_iter(str.islower))
+def text_is_empty(text: BaseText) -> bool:
+    return not any(text_map(text, bool))
 
 
-def upper(text: BaseText) -> BaseText:
-    return text.apply(str.upper)
+def text_is_upper(text: BaseText) -> bool:
+    return all(text_map(text, str.isupper))
 
 
-def lower(text: BaseText) -> BaseText:
-    return text.apply(str.lower)
+def text_is_lower(text: BaseText) -> bool:
+    return all(text_map(text, str.islower))
 
 
-def capitalize(text: BaseText) -> BaseText:
-    return text.apply(str.lower).apply_start(str.capitalize)
+def text_upper(text: BaseText) -> BaseText:
+    return text_functor_map(text, str.upper)
 
 
-def join_list(
-        sep: BaseText,
-        parts: List[BaseText],
-        sep2: Optional[BaseText] = None,
-        last_sep: Optional[BaseText] = None,
-        other: Optional[BaseText] = None
-        ) -> List[BaseText]:
+def text_lower(text: BaseText) -> BaseText:
+    return text_functor_map(text, str.lower)
+
+
+def text_capitalize(text: BaseText) -> BaseText:
+    def funcs() -> Iterator[Callable[[str], str]]:
+        # iterate until a non-empty string is found
+        for non_empty in text.map_iter(repeat(bool)):
+            if not non_empty:
+                yield lambda x: x
+            else:
+                break
+        # non-empty string is found! capitalize it
+        yield str.capitalize
+        # convert the rest to lower case
+        yield from repeat(str.lower)
+    return text.functor_map_iter(funcs())
+
+
+def text_capfirst(text: BaseText) -> BaseText:
+    def _capfirst(value: str) -> str:
+        return value[0].upper() + value[1]
+
+    def funcs() -> Iterator[Callable[[str], str]]:
+        # iterate until a non-empty string is found
+        for non_empty in text.map_iter(repeat(bool)):
+            if not non_empty:
+                yield lambda x: x
+            else:
+                break
+        # non-empty string is found! capitalize first character
+        yield _capfirst
+        # keep the rest as is
+        yield from repeat(lambda x: x)
+
+    return text.functor_map_iter(funcs())
+
+
+def list_join(
+        sep: T,
+        parts: List[T],
+        sep2: Optional[T] = None,
+        last_sep: Optional[T] = None,
+        other: Optional[T] = None
+        ) -> List[T]:
     if not parts:
         return []
     elif len(parts) == 1:
@@ -131,9 +168,8 @@ def join_list(
     elif len(parts) == 2:
         return [parts[0], sep2 if sep2 is not None else sep, parts[1]]
     elif other is None:
-        _last_sep: BaseText = last_sep if last_sep is not None else sep
-        first = [text for part in parts[:-2] for text in [part, sep]]
-        last = [parts[-2], _last_sep, parts[-1]]
-        return first + last
+        p1 = [text for part in parts[:-2] for text in [part, sep]]
+        p2 = [parts[-2], last_sep if last_sep is not None else sep, parts[-1]]
+        return p1 + p2
     else:
         return [parts[0], other]

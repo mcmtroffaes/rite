@@ -1,17 +1,12 @@
 from functools import singledispatch
 from typing import Iterable
 
-from rite.richtext import BaseText, String, Tag, Text
+from rite.richtext import BaseText, String, Tag, Text, text_map
 
 
 @singledispatch
 def render_html(text: BaseText) -> Iterable[str]:
-    raise TypeError(f'rendering {type(text)} to html is not implemented')
-
-
-@render_html.register(String)
-def _string(text: String) -> Iterable[str]:
-    yield f"{text.value}"
+    yield from text_map(lambda x: x)
 
 
 @render_html.register(Tag)
