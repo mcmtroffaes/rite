@@ -1,4 +1,4 @@
-from typing import Iterable, Any
+from typing import Iterable
 
 from rite.backend import RenderProtocol
 from rite.backend.html import render_html

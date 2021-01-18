@@ -1,7 +1,7 @@
 from functools import singledispatch
 from typing import Iterable, Dict, Tuple
 
-from rite.richtext import BaseText, String, Text, Tag, TagType
+from rite.richtext import BaseText, Text, Tag, TagType
 from rite.richtext.utils import text_map
 
 markdown_tags: Dict[TagType, Tuple[str, str]] = {

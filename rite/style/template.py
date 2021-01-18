@@ -1,4 +1,3 @@
-import string
 from typing import TypeVar, Protocol, Optional, List
 
 from rite.richtext import BaseText, String, Text, Tag, TagType

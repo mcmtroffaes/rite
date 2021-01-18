@@ -144,5 +144,6 @@ def test_text_capfirst(text: BaseText, result: BaseText):
         dict(sep=", ", sep2=" and ", other=" and others")
     ),
 ])
-def test_list_join(inputs: List[str], outputs: List[str], kwargs: Dict[str, str]):
+def test_list_join(
+        inputs: List[str], outputs: List[str], kwargs: Dict[str, str]):
     assert list_join(inputs, **kwargs) == outputs
