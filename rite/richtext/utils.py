@@ -29,11 +29,11 @@ def text_is_empty(text: BaseText) -> bool:
 
 
 def text_is_upper(text: BaseText) -> bool:
-    return all(text_map(text, str.isupper))
+    return text_raw(text).isupper()
 
 
 def text_is_lower(text: BaseText) -> bool:
-    return all(text_map(text, str.islower))
+    return text_raw(text).islower()
 
 
 def text_upper(text: BaseText) -> BaseText:

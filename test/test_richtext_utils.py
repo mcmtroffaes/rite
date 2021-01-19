@@ -54,6 +54,7 @@ def test_text_is_empty(text: BaseText, is_empty: bool):
 
 
 @pytest.mark.parametrize("text,is_lower,is_upper", [
+    (_s(''), False, False),
     (_s('hello'), True, False),
     (_s('HELLO'), False, True),
     (_s('heLLO'), False, False),
@@ -63,6 +64,9 @@ def test_text_is_empty(text: BaseText, is_empty: bool):
     (Text([_s('hello'), _s(' world')]), True, False),
     (Text([_s('HELLO'), _s(' WORLD')]), False, True),
     (Text([_s('hello'), _s(' WORLD')]), False, False),
+    (Text([_s('hello'), _s(''), _s(' world')]), True, False),
+    (Text([_s('HELLO'), _s(''), _s(' WORLD')]), False, True),
+    (Text([_s('hello'), _s(''), _s(' WORLD')]), False, False),
 ])
 def test_text_is_lower_upper(text: BaseText, is_lower: bool, is_upper: bool):
     assert text_is_lower(text) is is_lower
