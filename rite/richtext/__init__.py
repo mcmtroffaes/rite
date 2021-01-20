@@ -1,20 +1,13 @@
 import dataclasses
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Callable, List, TypeVar, Iterable, Iterator
-
-T = TypeVar('T')
+from typing import Callable, List, Iterable, Iterator
 
 
-class BaseText(ABC):
+class BaseText(ABC, Iterable[str]):
     """Rich text is a collection of strings with some additional formatting
     attached to it.
     """
-
-    @abstractmethod
-    def __iter__(self) -> Iterable[str]:
-        """Return all raw unformatted strings from the text."""
-        raise NotImplementedError
 
     @abstractmethod
     def fmap(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
@@ -29,7 +22,7 @@ class BaseText(ABC):
 class String(BaseText):
     value: str
 
-    def __iter__(self) -> Iterable[str]:
+    def __iter__(self) -> Iterator[str]:
         yield self.value
 
     def fmap(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
@@ -40,9 +33,10 @@ class String(BaseText):
 class Text(BaseText):
     parts: List[BaseText]
 
-    def __iter__(self) -> Iterable[str]:
+    def __iter__(self) -> Iterator[str]:
         for part in self.parts:
-            yield from part
+            for str_ in part:
+                yield str_
 
     def fmap(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
         return Text([part.fmap(funcs) for part in self.parts])
@@ -53,7 +47,7 @@ class Protected(BaseText):
     """Protected against content changes through :meth:`functor_map_iter`."""
     child: BaseText
 
-    def __iter__(self) -> Iterable[str]:
+    def __iter__(self) -> Iterator[str]:
         yield from self.child
 
     def fmap(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
@@ -74,7 +68,7 @@ class Tag(BaseText):
     tag: TagType
     text: BaseText
 
-    def __iter__(self) -> Iterable[str]:
+    def __iter__(self) -> Iterator[str]:
         yield from self.text
 
     def fmap(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
