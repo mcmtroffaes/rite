@@ -12,15 +12,14 @@ class BaseText(ABC):
     """
 
     @abstractmethod
-    def map_iter(self, funcs: Iterator[Callable[[str], T]]) -> Iterable[T]:
+    def __iter__(self) -> Iterable[str]:
         """Apply iterator *funcs* of functions consecutively to each string
         in the text and return the results.
         """
         raise NotImplementedError
 
     @abstractmethod
-    def functor_map_iter(
-            self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
+    def fmap(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
         """Apply the iterator *funcs* of functions consecutively to each string
         in the text and return the resulting rich text, retaining the original
         markup.
@@ -32,11 +31,10 @@ class BaseText(ABC):
 class String(BaseText):
     value: str
 
-    def map_iter(self, funcs: Iterator[Callable[[str], T]]) -> Iterable[T]:
-        yield next(funcs)(self.value)
+    def __iter__(self) -> Iterable[str]:
+        yield self.value
 
-    def functor_map_iter(
-            self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
+    def fmap(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
         return String(next(funcs)(self.value))
 
 
@@ -44,13 +42,12 @@ class String(BaseText):
 class Text(BaseText):
     parts: List[BaseText]
 
-    def map_iter(self, funcs: Iterator[Callable[[str], T]]) -> Iterable[T]:
+    def __iter__(self) -> Iterable[str]:
         for part in self.parts:
-            yield from part.map_iter(funcs)
+            yield from part
 
-    def functor_map_iter(
-            self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
-        return Text([part.functor_map_iter(funcs) for part in self.parts])
+    def fmap(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
+        return Text([part.fmap(funcs) for part in self.parts])
 
 
 @dataclasses.dataclass(frozen=True)
@@ -58,11 +55,10 @@ class Protected(BaseText):
     """Protected against content changes through :meth:`functor_map_iter`."""
     child: BaseText
 
-    def map_iter(self, funcs: Iterator[Callable[[str], T]]) -> Iterable[T]:
-        yield from self.child.map_iter(funcs)
+    def __iter__(self) -> Iterable[str]:
+        yield from self.child
 
-    def functor_map_iter(
-            self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
+    def fmap(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
         return self
 
 
@@ -80,9 +76,8 @@ class Tag(BaseText):
     tag: TagType
     text: BaseText
 
-    def map_iter(self, funcs: Iterator[Callable[[str], T]]) -> Iterable[T]:
-        yield from self.text.map_iter(funcs)
+    def __iter__(self) -> Iterable[str]:
+        yield from self.text
 
-    def functor_map_iter(
-            self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
-        return Tag(self.tag, self.text.functor_map_iter(funcs))
+    def fmap(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
+        return Tag(self.tag, self.text.fmap(funcs))

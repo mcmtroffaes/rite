@@ -8,12 +8,12 @@ T = TypeVar('T')
 
 
 def text_map(text: BaseText, func: Callable[[str], T]) -> Iterable[T]:
-    return text.map_iter(repeat(func))
+    return map(func, text)
 
 
 def text_functor_map(
         text: BaseText, func: Callable[[str], str]) -> BaseText:
-    return text.functor_map_iter(repeat(func))
+    return text.fmap(repeat(func))
 
 
 def text_strings(text: BaseText) -> Iterable[str]:
@@ -53,7 +53,7 @@ def text_capitalize(text: BaseText) -> BaseText:
         yield str.capitalize
         # convert the rest to lower case
         yield from repeat(str.lower)
-    return text.functor_map_iter(funcs())
+    return text.fmap(funcs())
 
 
 def text_capfirst(text: BaseText) -> BaseText:
@@ -70,7 +70,7 @@ def text_capfirst(text: BaseText) -> BaseText:
         # keep the rest as is
         yield from repeat(lambda x: x)
 
-    return text.functor_map_iter(funcs())
+    return text.fmap(funcs())
 
 
 _punctuation_chars = tuple(char for char in string.punctuation)
