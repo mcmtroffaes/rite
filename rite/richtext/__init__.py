@@ -10,7 +10,7 @@ class BaseText(ABC, Iterable[str]):
     """
 
     @abstractmethod
-    def fmap(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
+    def fmap_iter(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
         """Apply the iterator *funcs* of functions consecutively to each string
         in the text and return the resulting rich text, retaining the original
         markup.
@@ -25,7 +25,7 @@ class String(BaseText):
     def __iter__(self) -> Iterator[str]:
         yield self.value
 
-    def fmap(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
+    def fmap_iter(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
         return String(next(funcs)(self.value))
 
 
@@ -38,8 +38,8 @@ class Text(BaseText):
             for str_ in part:
                 yield str_
 
-    def fmap(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
-        return Text([part.fmap(funcs) for part in self.parts])
+    def fmap_iter(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
+        return Text([part.fmap_iter(funcs) for part in self.parts])
 
 
 @dataclasses.dataclass(frozen=True)
@@ -50,7 +50,7 @@ class Protected(BaseText):
     def __iter__(self) -> Iterator[str]:
         yield from self.child
 
-    def fmap(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
+    def fmap_iter(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
         return self
 
 
@@ -71,5 +71,5 @@ class Tag(BaseText):
     def __iter__(self) -> Iterator[str]:
         yield from self.text
 
-    def fmap(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
-        return Tag(self.tag, self.text.fmap(funcs))
+    def fmap_iter(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
+        return Tag(self.tag, self.text.fmap_iter(funcs))

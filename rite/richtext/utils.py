@@ -7,9 +7,8 @@ from rite.richtext import BaseText
 T = TypeVar('T')
 
 
-def text_functor_map(
-        text: BaseText, func: Callable[[str], str]) -> BaseText:
-    return text.fmap(repeat(func))
+def text_fmap(text: BaseText, func: Callable[[str], str]) -> BaseText:
+    return text.fmap_iter(repeat(func))
 
 
 def text_raw(text: BaseText) -> str:
@@ -29,11 +28,11 @@ def text_is_lower(text: BaseText) -> bool:
 
 
 def text_upper(text: BaseText) -> BaseText:
-    return text_functor_map(text, str.upper)
+    return text_fmap(text, str.upper)
 
 
 def text_lower(text: BaseText) -> BaseText:
-    return text_functor_map(text, str.lower)
+    return text_fmap(text, str.lower)
 
 
 def text_capitalize(text: BaseText) -> BaseText:
@@ -45,7 +44,7 @@ def text_capitalize(text: BaseText) -> BaseText:
         yield str.capitalize
         # convert the rest to lower case
         yield from repeat(str.lower)
-    return text.fmap(funcs())
+    return text.fmap_iter(funcs())
 
 
 def text_capfirst(text: BaseText) -> BaseText:
@@ -62,7 +61,7 @@ def text_capfirst(text: BaseText) -> BaseText:
         # keep the rest as is
         yield from repeat(lambda x: x)
 
-    return text.fmap(funcs())
+    return text.fmap_iter(funcs())
 
 
 _punctuation_chars = tuple(char for char in string.punctuation)
