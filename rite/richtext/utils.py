@@ -7,25 +7,17 @@ from rite.richtext import BaseText
 T = TypeVar('T')
 
 
-def text_map(text: BaseText, func: Callable[[str], T]) -> Iterable[T]:
-    return map(func, text)
-
-
 def text_functor_map(
         text: BaseText, func: Callable[[str], str]) -> BaseText:
     return text.fmap(repeat(func))
 
 
-def text_strings(text: BaseText) -> Iterable[str]:
-    return text_map(text, lambda x: x)
-
-
 def text_raw(text: BaseText) -> str:
-    return ''.join(text_strings(text))
+    return ''.join(text)
 
 
 def text_is_empty(text: BaseText) -> bool:
-    return not any(text_map(text, bool))
+    return not any(map(bool, text))
 
 
 def text_is_upper(text: BaseText) -> bool:
@@ -47,7 +39,7 @@ def text_lower(text: BaseText) -> BaseText:
 def text_capitalize(text: BaseText) -> BaseText:
     def funcs() -> Iterator[Callable[[str], str]]:
         # iterate until a non-empty string is found
-        for _ in takewhile(lambda x: not x, text_strings(text)):
+        for _ in takewhile(lambda x: not x, text):
             yield lambda x: x
         # non-empty string is found! capitalize it
         yield str.capitalize
@@ -63,7 +55,7 @@ def text_capfirst(text: BaseText) -> BaseText:
 
     def funcs() -> Iterator[Callable[[str], str]]:
         # iterate until a non-empty string is found
-        for _ in takewhile(lambda x: not x, text_strings(text)):
+        for _ in takewhile(lambda x: not x, text):
             yield lambda x: x
         # non-empty string is found! capitalize first character
         yield _capfirst

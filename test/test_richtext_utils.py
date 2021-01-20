@@ -4,7 +4,7 @@ import pytest
 
 from rite.richtext import String, Text, Tag, TagType, BaseText
 from rite.richtext.utils import (
-    list_join, text_map, text_functor_map, text_raw, text_is_empty,
+    list_join, text_functor_map, text_raw, text_is_empty,
     text_is_lower, text_is_upper, text_lower, text_upper,
     text_capitalize, text_capfirst,
 )
@@ -35,7 +35,7 @@ def test_text_map(
         result_map: List[str], result_functor_map: BaseText,
         result_raw: str
 ):
-    assert list(text_map(text, func)) == result_map
+    assert list(map(func, text)) == result_map
     assert text_functor_map(text, func) == result_functor_map
     assert text_raw(text) == result_raw
 
