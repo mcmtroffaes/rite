@@ -36,7 +36,7 @@ def test_text_map(
         result_raw: str
 ):
     assert list(map(func, text)) == result_map
-    assert text_fmap(text, func) == result_functor_map
+    assert text_fmap(func, text) == result_functor_map
     assert text_raw(text) == result_raw
 
 

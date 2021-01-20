@@ -1,13 +1,13 @@
 import string
 from itertools import repeat, takewhile
-from typing import Callable, TypeVar, Iterable, List, Optional, Iterator
+from typing import Callable, TypeVar, List, Optional, Iterator
 
 from rite.richtext import BaseText
 
 T = TypeVar('T')
 
 
-def text_fmap(text: BaseText, func: Callable[[str], str]) -> BaseText:
+def text_fmap(func: Callable[[str], str], text: BaseText) -> BaseText:
     return text.fmap_iter(repeat(func))
 
 
@@ -28,11 +28,11 @@ def text_is_lower(text: BaseText) -> bool:
 
 
 def text_upper(text: BaseText) -> BaseText:
-    return text_fmap(text, str.upper)
+    return text_fmap(str.upper, text)
 
 
 def text_lower(text: BaseText) -> BaseText:
-    return text_fmap(text, str.lower)
+    return text_fmap(str.lower, text)
 
 
 def text_capitalize(text: BaseText) -> BaseText:
