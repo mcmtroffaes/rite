@@ -13,9 +13,7 @@ class BaseText(ABC):
 
     @abstractmethod
     def __iter__(self) -> Iterable[str]:
-        """Apply iterator *funcs* of functions consecutively to each string
-        in the text and return the results.
-        """
+        """Return all raw unformatted strings from the text."""
         raise NotImplementedError
 
     @abstractmethod
