@@ -35,8 +35,7 @@ class Text(BaseText):
 
     def __iter__(self) -> Iterator[str]:
         for part in self.parts:
-            for str_ in part:
-                yield str_
+            yield from part
 
     def fmap_iter(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
         return Text([part.fmap_iter(funcs) for part in self.parts])
