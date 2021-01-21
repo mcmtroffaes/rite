@@ -6,6 +6,7 @@ import pytest
 
 from rite.parse import ParseProtocol
 from rite.parse.html import parse_html
+from rite.parse.xml_etree import parse_xml_etree
 from rite.render import RenderProtocol
 from rite.render.html import render_html
 from rite.render.markdown import render_markdown
@@ -152,18 +153,16 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                         String('l'),
                         Tag(TagType.CODE, String('l')),
                         String('o'),
-                        Tag(TagType.SUBSCRIPT, String('')),
                     ])),
                 ],
                 'hello',
-                '<strong>h<em>e</em>l<code>l</code>o<sub></sub></strong>',
-                '**h*e*l`l`o<sub></sub>**',
-                '**h*e*l``l``o:sub:``**',
+                '<strong>h<em>e</em>l<code>l</code>o</strong>',
+                '**h*e*l`l`o**',
+                '**h*e*l``l``o**',
                 (None, [
                     make_element('strong', text='h', children=[
                         make_element('em', text='e', tail='l'),
                         make_element('code', text='l', tail='o'),
-                        make_element('sub'),
                     ])])
         ),
     ])
@@ -185,8 +184,20 @@ def test_render_parse(
         ([String('he'), String('llo')], ('hello', [])),
         ([Tag(TagType.EMPHASIS, String('he')), String('ll'), String('o')],
          (None, [make_element('em', text='he', tail='llo')])),
+        ([Tag(TagType.SUBSCRIPT, String(''))],
+         (None, [make_element('sub', text='')])),
     ])
 def test_render_xml_etree(
         texts: List[BaseText],
         xml_etree: Tuple[Optional[str], Iterable[Element]]) -> None:
     assert_xml_etree_equal(render_xml_etree(Join(texts)), xml_etree)
+
+
+# some extra tests for coverage
+@pytest.mark.parametrize(
+    "element,texts", [
+        (make_element('sub', text=''), [Tag(TagType.SUBSCRIPT, String(''))]),
+        (make_element('sub'), []),
+    ])
+def test_parse_xml_etree(element: Element, texts: List[BaseText]) -> None:
+    assert list(parse_xml_etree(element)) == texts

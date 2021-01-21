@@ -24,12 +24,9 @@ def parse_xml_etree(element: Element) -> Iterable[BaseText]:
     if tag_type is not None:
         text: BaseText
         if len(children) == 1:
-            text = children[0]
+            yield Tag(tag_type, children[0])
         elif len(children) > 1:
-            text = Join(children)
-        else:
-            text = String('')
-        yield Tag(tag_type, text)
+            yield Tag(tag_type, Join(children))
     else:
         yield from children
     if element.tail is not None:
