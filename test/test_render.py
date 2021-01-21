@@ -5,7 +5,7 @@ from rite.backends.html import render_html
 from rite.backends.markdown import render_markdown
 from rite.backends.plaintext import render_plaintext
 from rite.backends.rst import render_rst
-from rite.richtext import String, Tag, TagType, Text, BaseText
+from rite.richtext import String, Tag, TagType, Join, BaseText
 
 
 def test_protocol() -> None:
@@ -46,7 +46,7 @@ def test_protocol_bad_rt() -> None:
 
 
 def test_hello_brave_world() -> None:
-    s = Text([String('hello '),
+    s = Join([String('hello '),
               Tag(TagType.STRONG, String('brave')),
               String(' world!')])
     assert ''.join(render_plaintext(s)) == 'hello brave world!'
@@ -56,7 +56,7 @@ def test_hello_brave_world() -> None:
 
 
 def test_escape() -> None:
-    s = Text([String('hello '),
+    s = Join([String('hello '),
               Tag(TagType.STRONG, String('"<[*]>"')),
               String(' world!')])
     assert ''.join(render_plaintext(s)) == 'hello "<[*]>" world!'

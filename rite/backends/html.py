@@ -3,7 +3,7 @@ import html
 from functools import singledispatch
 from typing import Iterable
 
-from rite.richtext import BaseText, Tag, Text
+from rite.richtext import BaseText, Tag, Join
 
 
 def escape(value: str) -> str:
@@ -22,7 +22,7 @@ def _tag(text: Tag) -> Iterable[str]:
     yield f"</{text.tag.value}>"
 
 
-@render_html.register(Text)
-def _text(text: Text) -> Iterable[str]:
+@render_html.register(Join)
+def _join(text: Join) -> Iterable[str]:
     for part in text.parts:
         yield from render_html(part)

@@ -30,7 +30,7 @@ class String(BaseText):
 
 
 @dataclasses.dataclass(frozen=True)
-class Text(BaseText):
+class Join(BaseText):
     parts: List[BaseText]
 
     def __iter__(self) -> Iterator[str]:
@@ -38,7 +38,7 @@ class Text(BaseText):
             yield from part
 
     def fmap_iter(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
-        return Text([part.fmap_iter(funcs) for part in self.parts])
+        return Join([part.fmap_iter(funcs) for part in self.parts])
 
 
 @dataclasses.dataclass(frozen=True)

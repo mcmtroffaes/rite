@@ -2,7 +2,7 @@ from typing import Callable, List, Dict
 
 import pytest
 
-from rite.richtext import String, Text, Tag, TagType, BaseText
+from rite.richtext import String, Join, Tag, TagType, BaseText
 from rite.richtext.utils import (
     list_join, text_fmap, text_raw, text_is_empty,
     text_is_lower, text_is_upper, text_lower, text_upper,
@@ -23,11 +23,11 @@ def _t(value: str) -> Tag:
 @pytest.mark.parametrize(
     "text,func,result_map,result_functor_map,result_raw", [
         (
-            Text([_s("one "), _t("two"), _s(" three")]),
-            lambda x: "*" + x + "*",
-            ['*one *', '*two*', '* three*'],
-            Text([_s("*one *"), _t("*two*"), _s("* three*")]),
-            'one two three',
+                Join([_s("one "), _t("two"), _s(" three")]),
+                lambda x: "*" + x + "*",
+                ['*one *', '*two*', '* three*'],
+                Join([_s("*one *"), _t("*two*"), _s("* three*")]),
+                'one two three',
         ),
     ])
 def test_text_map(
@@ -45,9 +45,9 @@ def test_text_map(
     (_s('hello'), False),
     (_t(''), True),
     (_t('hello'), False),
-    (Text([]), True),
-    (Text([_s('')]), True),
-    (Text([_s(''), _s('hello')]), False),
+    (Join([]), True),
+    (Join([_s('')]), True),
+    (Join([_s(''), _s('hello')]), False),
 ])
 def test_text_is_empty(text: BaseText, is_empty: bool):
     assert text_is_empty(text) is is_empty
@@ -61,12 +61,12 @@ def test_text_is_empty(text: BaseText, is_empty: bool):
     (_t('hello'), True, False),
     (_t('HELLO'), False, True),
     (_t('heLLO'), False, False),
-    (Text([_s('hello'), _s(' world')]), True, False),
-    (Text([_s('HELLO'), _s(' WORLD')]), False, True),
-    (Text([_s('hello'), _s(' WORLD')]), False, False),
-    (Text([_s('hello'), _s(''), _s(' world')]), True, False),
-    (Text([_s('HELLO'), _s(''), _s(' WORLD')]), False, True),
-    (Text([_s('hello'), _s(''), _s(' WORLD')]), False, False),
+    (Join([_s('hello'), _s(' world')]), True, False),
+    (Join([_s('HELLO'), _s(' WORLD')]), False, True),
+    (Join([_s('hello'), _s(' WORLD')]), False, False),
+    (Join([_s('hello'), _s(''), _s(' world')]), True, False),
+    (Join([_s('HELLO'), _s(''), _s(' WORLD')]), False, True),
+    (Join([_s('hello'), _s(''), _s(' WORLD')]), False, False),
 ])
 def test_text_is_lower_upper(text: BaseText, is_lower: bool, is_upper: bool):
     assert text_is_lower(text) is is_lower
@@ -81,16 +81,19 @@ def test_text_is_lower_upper(text: BaseText, is_lower: bool, is_upper: bool):
     (_t('HELLO'), _t('hello'), _t('HELLO')),
     (_t('heLLO'), _t('hello'), _t('HELLO')),
     (
-        Text([_s('hello'), _s(' world')]),
-        Text([_s('hello'), _s(' world')]), Text([_s('HELLO'), _s(' WORLD')]),
+            Join([_s('hello'), _s(' world')]),
+            Join([_s('hello'), _s(' world')]),
+            Join([_s('HELLO'), _s(' WORLD')]),
     ),
     (
-        Text([_s('HELLO'), _s(' WORLD')]),
-        Text([_s('hello'), _s(' world')]), Text([_s('HELLO'), _s(' WORLD')])
+            Join([_s('HELLO'), _s(' WORLD')]),
+            Join([_s('hello'), _s(' world')]),
+            Join([_s('HELLO'), _s(' WORLD')]),
     ),
     (
-        Text([_s('hello'), _s(' WORLD')]),
-        Text([_s('hello'), _s(' world')]), Text([_s('HELLO'), _s(' WORLD')])
+            Join([_s('hello'), _s(' WORLD')]),
+            Join([_s('hello'), _s(' world')]),
+            Join([_s('HELLO'), _s(' WORLD')]),
     ),
 ])
 def test_text_lower_upper(text: BaseText, lower: BaseText, upper: BaseText):
@@ -99,24 +102,24 @@ def test_text_lower_upper(text: BaseText, lower: BaseText, upper: BaseText):
 
 
 @pytest.mark.parametrize("text,result", [
-    (Text([]), Text([])),
+    (Join([]), Join([])),
     (_s(''), _s('')),
     (_s('heLLO'), _s('Hello')),
     (_t('heLLO'), _t('Hello')),
-    (Text([_s(''), _t('heLLO')]), Text([_s(''), _t('Hello')])),
-    (Text([_s(''), _t('heL'), _s('LO')]), Text([_s(''), _t('Hel'), _s('lo')])),
+    (Join([_s(''), _t('heLLO')]), Join([_s(''), _t('Hello')])),
+    (Join([_s(''), _t('heL'), _s('LO')]), Join([_s(''), _t('Hel'), _s('lo')])),
 ])
 def test_text_capitalize(text: BaseText, result: BaseText):
     assert text_capitalize(text) == result
 
 
 @pytest.mark.parametrize("text,result", [
-    (Text([]), Text([])),
+    (Join([]), Join([])),
     (_s(''), _s('')),
     (_s('heLLO'), _s('HeLLO')),
     (_t('heLLO'), _t('HeLLO')),
-    (Text([_s(''), _t('heLLO')]), Text([_s(''), _t('HeLLO')])),
-    (Text([_s(''), _t('heL'), _s('LO')]), Text([_s(''), _t('HeL'), _s('LO')])),
+    (Join([_s(''), _t('heLLO')]), Join([_s(''), _t('HeLLO')])),
+    (Join([_s(''), _t('heL'), _s('LO')]), Join([_s(''), _t('HeL'), _s('LO')])),
 ])
 def test_text_capfirst(text: BaseText, result: BaseText):
     assert text_capfirst(text) == result

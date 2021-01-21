@@ -6,7 +6,7 @@ if sys.version_info >= (3, 8):
 else:
     from typing_extensions import Protocol
 
-from rite.richtext import BaseText, String, TagType, Tag, Text
+from rite.richtext import BaseText, String, TagType, Tag, Join
 from rite.style.template import (
     Node, tag, str_, join, capfirst, capitalize, lower, upper
 )
@@ -71,7 +71,7 @@ class PersonWithGender:
 
 def test_template() -> None:
     template: Node[str] = join([str_data(), str_(' world')])
-    assert template('hello') == Text([_t('hello'), _s(' world')])
+    assert template('hello') == Join([_t('hello'), _s(' world')])
 
 
 def test_protocol() -> None:
@@ -86,11 +86,11 @@ def test_protocol() -> None:
         female=True)
     text1 = template(person1)
     text2 = template(person2)
-    assert text1 == Text([
+    assert text1 == Join([
         Tag(TagType.EMPHASIS, _s('John')),
         _s(': '),
         Tag(TagType.STRONG, _s('Mar 07, 1998'))])
-    assert text2 == Text([
+    assert text2 == Join([
         Tag(TagType.EMPHASIS, _s('Mary')),
         _s(': '),
         Tag(TagType.STRONG, _s('Jun 22, 1997'))])
@@ -98,19 +98,19 @@ def test_protocol() -> None:
 
 def test_capfirst():
     template = capfirst(join([str_(''), str_data(), str_(' world')]))
-    assert template('hello') == Text([_s(''), _t('Hello'), _s(' world')])
+    assert template('hello') == Join([_s(''), _t('Hello'), _s(' world')])
 
 
 def test_capitalize():
     template = capitalize(join([str_(''), str_data(), str_(' WORLD')]))
-    assert template('heLLo') == Text([_s(''), _t('Hello'), _s(' world')])
+    assert template('heLLo') == Join([_s(''), _t('Hello'), _s(' world')])
 
 
 def test_lower():
     template = lower(join([str_(''), str_data(), str_(' WORLD')]))
-    assert template('heLLo') == Text([_s(''), _t('hello'), _s(' world')])
+    assert template('heLLo') == Join([_s(''), _t('hello'), _s(' world')])
 
 
 def test_upper():
     template = upper(join([str_(''), str_data(), str_(' WORLD')]))
-    assert template('heLLo') == Text([_s(''), _t('HELLO'), _s(' WORLD')])
+    assert template('heLLo') == Join([_s(''), _t('HELLO'), _s(' WORLD')])

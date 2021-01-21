@@ -1,6 +1,6 @@
 from itertools import repeat
 
-from rite.richtext import String, Tag, TagType, Text, Protected
+from rite.richtext import String, Tag, TagType, Join, Protected
 
 
 def test_string():
@@ -9,12 +9,12 @@ def test_string():
     assert x.fmap_iter(repeat(str.capitalize)) == String('Hello')
 
 
-def test_text():
-    x = Text([String('hello'), String(' '), String('world')])
+def test_join():
+    x = Join([String('hello'), String(' '), String('world')])
     assert list(map(str.capitalize, x)) \
            == ['Hello', ' ', 'World']
     assert x.fmap_iter(repeat(str.capitalize)) \
-           == Text([String('Hello'), String(' '), String('World')])
+           == Join([String('Hello'), String(' '), String('World')])
 
 
 def test_tag():
@@ -32,13 +32,13 @@ def test_protected():
 
 
 # verify Text can contain String, Tag, and Text
-def test_text_combined():
-    x1 = Text([String('hello '),
+def test_join_combined():
+    x1 = Join([String('hello '),
                Tag(TagType.STRONG, String('brave')),
-               Text([String(' world')])])
-    x2 = Text([String('HELLO '),
+               Join([String(' world')])])
+    x2 = Join([String('HELLO '),
                Tag(TagType.STRONG, String('BRAVE')),
-               Text([String(' WORLD')])])
+               Join([String(' WORLD')])])
     assert x1.fmap_iter(repeat(str.upper)) == x2
 
 

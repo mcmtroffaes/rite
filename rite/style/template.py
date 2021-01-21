@@ -5,7 +5,7 @@ if sys.version_info >= (3, 8):
 else:
     from typing_extensions import Protocol
 
-from rite.richtext import BaseText, String, Text, Tag, TagType
+from rite.richtext import BaseText, String, Join, Tag, TagType
 from rite.richtext.utils import (
     list_join, text_capfirst, text_lower, text_upper, text_capitalize,
 )
@@ -34,7 +34,7 @@ def join(children: List[Node[Data]],
          ) -> Node[Data]:
     """A node which joins its *children* with the given separators."""
     def fmt(data: Data) -> BaseText:
-        return Text(list_join(
+        return Join(list_join(
             [child(data) for child in children],
             sep=sep, sep2=sep2, last_sep=last_sep, other=other))
     return fmt

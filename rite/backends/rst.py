@@ -1,7 +1,7 @@
 from functools import singledispatch
 from typing import Iterable, Dict, Tuple
 
-from rite.richtext import BaseText, Text, Tag, TagType
+from rite.richtext import BaseText, Join, Tag, TagType
 
 rst_tags: Dict[TagType, Tuple[str, str]] = {
     TagType.EMPHASIS: ('*', '*'),
@@ -33,7 +33,7 @@ def _tag(text: Tag) -> Iterable[str]:
     yield tags[1]
 
 
-@render_rst.register(Text)
-def _text(text: Text) -> Iterable[str]:
+@render_rst.register(Join)
+def _join(text: Join) -> Iterable[str]:
     for part in text.parts:
         yield from render_rst(part)

@@ -1,7 +1,7 @@
 from functools import singledispatch
 from typing import Iterable, Dict, Tuple
 
-from rite.richtext import BaseText, Text, Tag, TagType
+from rite.richtext import BaseText, Join, Tag, TagType
 
 markdown_tags: Dict[TagType, Tuple[str, str]] = {
     TagType.EMPHASIS: ('*', '*'),
@@ -34,7 +34,7 @@ def _tag(text: Tag) -> Iterable[str]:
     yield tags[1]
 
 
-@render_markdown.register(Text)
-def _text(text: Text) -> Iterable[str]:
+@render_markdown.register(Join)
+def _join(text: Join) -> Iterable[str]:
     for part in text.parts:
         yield from render_markdown(part)
