@@ -1,5 +1,5 @@
 import pkg_resources
-from typing import Type, Any
+from typing import Any
 
 
 def find_plugin(group: str, name: str) -> Any:
