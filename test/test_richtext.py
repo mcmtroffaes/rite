@@ -5,23 +5,27 @@ from rite.richtext import String, Tag, TagType, Join, Protected
 
 def test_string():
     x = String('hello')
+    assert list(x) == []
     assert x.fmap_iter(repeat(str.capitalize)) == String('Hello')
 
 
 def test_join():
     x = Join([String('hello'), String(' '), String('world')])
+    assert list(x) == [String('hello'), String(' '), String('world')]
     assert x.fmap_iter(repeat(str.capitalize)) \
            == Join([String('Hello'), String(' '), String('World')])
 
 
 def test_tag():
     x = Tag(TagType.EMPHASIS, String('hello'))
+    assert list(x) == [String('hello')]
     assert x.fmap_iter(repeat(str.capitalize)) \
            == Tag(TagType.EMPHASIS, String('Hello'))
 
 
 def test_protected():
     x = Protected(String('hello'))
+    assert list(x) == [String('hello')]
     assert x.fmap_iter(repeat(str.capitalize)) == x
 
 
