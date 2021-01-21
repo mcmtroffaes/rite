@@ -19,11 +19,11 @@ def render_html(text: BaseText) -> Iterable[str]:
 @render_html.register(Tag)
 def _tag(text: Tag) -> Iterable[str]:
     yield f"<{text.tag.value}>"
-    yield from render_html(text.text)
+    yield from render_html(text.child)
     yield f"</{text.tag.value}>"
 
 
 @render_html.register(Join)
 def _join(text: Join) -> Iterable[str]:
-    for part in text.parts:
-        yield from render_html(part)
+    for child in text.children:
+        yield from render_html(child)

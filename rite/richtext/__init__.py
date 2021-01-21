@@ -31,13 +31,13 @@ class String(BaseText):
 
 @dataclasses.dataclass(frozen=True)
 class Join(BaseText):
-    parts: List[BaseText]
+    children: List[BaseText]
 
     def __iter__(self) -> Iterator["BaseText"]:
-        return iter(self.parts)
+        return iter(self.children)
 
     def fmap_iter(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
-        return Join([part.fmap_iter(funcs) for part in self.parts])
+        return Join([child.fmap_iter(funcs) for child in self.children])
 
 
 @dataclasses.dataclass(frozen=True)
@@ -64,10 +64,10 @@ class TagType(Enum):
 @dataclasses.dataclass(frozen=True)
 class Tag(BaseText):
     tag: TagType
-    text: BaseText
+    child: BaseText
 
     def __iter__(self) -> Iterator["BaseText"]:
-        yield self.text
+        yield self.child
 
     def fmap_iter(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
-        return Tag(self.tag, self.text.fmap_iter(funcs))
+        return Tag(self.tag, self.child.fmap_iter(funcs))

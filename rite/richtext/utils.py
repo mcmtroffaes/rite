@@ -80,21 +80,22 @@ _punctuation_chars = tuple(char for char in string.punctuation)
 
 
 def list_join(
-        parts: List[T],
+        children: List[T],
         sep: Optional[T] = None,
         sep2: Optional[T] = None,
         last_sep: Optional[T] = None,
         other: Optional[T] = None
         ) -> List[T]:
-    if sep is None or not parts:
-        return parts
-    elif len(parts) == 1:
-        return [parts[0]]
-    elif len(parts) == 2:
-        return [parts[0], sep2 if sep2 is not None else sep, parts[1]]
+    if sep is None or not children:
+        return children
+    elif len(children) == 1:
+        return [children[0]]
+    elif len(children) == 2:
+        return [children[0], sep2 if sep2 is not None else sep, children[1]]
     elif other is None:
-        p1 = [text for part in parts[:-2] for text in [part, sep]]
-        p2 = [parts[-2], last_sep if last_sep is not None else sep, parts[-1]]
+        p1 = [text for child in children[:-2] for text in [child, sep]]
+        p2 = [children[-2], last_sep if last_sep is not None else sep,
+              children[-1]]
         return p1 + p2
     else:
-        return [parts[0], other]
+        return [children[0], other]

@@ -31,11 +31,11 @@ def render_markdown(text: BaseText) -> Iterable[str]:
 def _tag(text: Tag) -> Iterable[str]:
     tags = markdown_tags[text.tag]
     yield tags[0]
-    yield from render_markdown(text.text)
+    yield from render_markdown(text.child)
     yield tags[1]
 
 
 @render_markdown.register(Join)
 def _join(text: Join) -> Iterable[str]:
-    for part in text.parts:
-        yield from render_markdown(part)
+    for child in text.children:
+        yield from render_markdown(child)

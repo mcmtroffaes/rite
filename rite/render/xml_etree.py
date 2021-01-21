@@ -23,7 +23,7 @@ def render_xml_etree(text: BaseText
 @render_xml_etree.register(Tag)
 def _tag(text: Tag) -> Tuple[Optional[str], Iterable[Element]]:
     element = Element(text.tag.value)
-    element.text, children = render_xml_etree(text.text)
+    element.text, children = render_xml_etree(text.child)
     element.extend(children)
     return None, [element]
 
@@ -32,19 +32,19 @@ def _tag(text: Tag) -> Tuple[Optional[str], Iterable[Element]]:
 def _join(text: Join) -> Tuple[Optional[str], Iterable[Element]]:
     head_text: Optional[str] = None
     children: List[Element] = []
-    for part in text.parts:
-        part_text, part_children = render_xml_etree(part)
-        if part_text:
+    for child in text.children:
+        child_text, child_children = render_xml_etree(child)
+        if child_text:
             if children:
                 last_element = children[-1]
                 if last_element.tail is None:
-                    last_element.tail = part_text
+                    last_element.tail = child_text
                 else:
-                    last_element.tail += part_text
+                    last_element.tail += child_text
             else:
                 if head_text is None:
-                    head_text = part_text
+                    head_text = child_text
                 else:
-                    head_text += part_text
-        children.extend(part_children)
+                    head_text += child_text
+        children.extend(child_children)
     return head_text, children

@@ -1,3 +1,4 @@
+from itertools import zip_longest
 from typing import Iterable, List, Tuple, Optional
 from xml.etree.ElementTree import Element
 
@@ -72,16 +73,19 @@ def none_to_empty(x: Optional[str]) -> str:
         return x
 
 
-def assert_xml_etree_equal(x1, x2):
+def assert_xml_etree_equal(
+        x1: Tuple[Optional[str], Iterable[Element]],
+        x2: Tuple[Optional[str], Iterable[Element]]) -> None:
     text1, e1s = x1
     text2, e2s = x2
     assert none_to_empty(text1) == none_to_empty(text2), 'head text mismatch'
-    assert len(e1s) == len(e2s)
-    for e1, e2 in zip(e1s, e2s):
+    for e1, e2 in zip_longest(e1s, e2s, fillvalue=None):
+        assert e1 is not None
+        assert e2 is not None
         assert_elements_equal(e1, e2)
 
 
-def assert_elements_equal(e1, e2):
+def assert_elements_equal(e1: Element, e2: Element) -> None:
     assert e1.tag == e2.tag, 'tag mismatch'
     assert none_to_empty(e1.text) == none_to_empty(e2.text), 'text mismatch'
     assert none_to_empty(e1.tail) == none_to_empty(e2.tail), 'tail mismatch'

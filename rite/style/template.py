@@ -43,7 +43,7 @@ def join(children: List[Node[Data]],
 def tag(tag_: TagType, child: Node[Data]) -> Node[Data]:
     """A node which adds a tag to its child."""
     def fmt(data: Data) -> BaseText:
-        return Tag(tag=tag_, text=child(data))
+        return Tag(tag=tag_, child=child(data))
     return fmt
 
 

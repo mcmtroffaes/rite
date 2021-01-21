@@ -30,11 +30,11 @@ def render_rst(text: BaseText) -> Iterable[str]:
 def _tag(text: Tag) -> Iterable[str]:
     tags = rst_tags[text.tag]
     yield tags[0]
-    yield from render_rst(text.text)
+    yield from render_rst(text.child)
     yield tags[1]
 
 
 @render_rst.register(Join)
 def _join(text: Join) -> Iterable[str]:
-    for part in text.parts:
-        yield from render_rst(part)
+    for child in text.children:
+        yield from render_rst(child)
