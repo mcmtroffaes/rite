@@ -1,15 +1,25 @@
+from typing import List
 from setuptools import setup, find_packages
 import codecs
 
 
-def readfile(filename):
+def readfile(filename: str) -> List[str]:
     with codecs.open(filename, encoding="utf-8") as stream:
         return stream.read().split("\n")
+
+
+def render_plugin(name: str) -> str:
+    return f'{name} = rite.render.{name}:render_{name}'
+
+
+def parse_plugin(name: str) -> str:
+    return f'{name} = rite.parse.{name}:parse_{name}'
 
 
 doclines = readfile("README.rst")
 requires = readfile("requirements.txt")
 version = readfile("VERSION")[0].strip()
+
 
 setup(
     name='rite',
@@ -47,15 +57,15 @@ setup(
     install_requires=requires,
     entry_points={
         'rite.render': [
-            'html = rite.render.html:render_html',
-            'markdown = rite.render.html:render_markdown',
-            'plaintext = rite.render.html:render_plaintext',
-            'rst = rite.render.html:render_rst',
-            'xml_etree = rite.render.xml_etree:render_xml_etree',
+            render_plugin('html'),
+            render_plugin('markdown'),
+            render_plugin('plaintext'),
+            render_plugin('rst'),
+            render_plugin('xml_etree'),
         ],
         'rite.parse': [
-            'html = rite.parse.html:parse_html',
-            'xml_etree = rite.parse.html:parse_xml_etree',
+            parse_plugin('html'),
+            parse_plugin('xml_etree'),
         ],
     }
 )
