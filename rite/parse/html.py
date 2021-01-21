@@ -6,4 +6,4 @@ from rite.richtext import BaseText
 
 
 def parse_html(source: str) -> Iterable[BaseText]:
-    return parse_xml_etree(fromstring(f"<html>{source}</html>"))
+    return parse_xml_etree(fromstring(f"<body>{source}</body>"))
