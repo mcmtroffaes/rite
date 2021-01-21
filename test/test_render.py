@@ -114,6 +114,25 @@ def assert_elements_equal(e1, e2):
                         'strong',
                         text='&quot;&lt;[*]&gt;&quot;', tail=' world!')]),
         ),
+        (
+                [
+                    String('hello '),
+                    Tag(TagType.STRONG, String('br')),
+                    Tag(TagType.EMPHASIS, String('a')),
+                    String('v'),
+                    Tag(TagType.CODE, String('e')),
+                    String(' world!'),
+                ],
+                'hello brave world!',
+                'hello <strong>br</strong><em>a</em>v<code>e</code> world!',
+                r'hello **br***a*v`e` world\!',
+                r'hello **br***a*v``e`` world!',
+                ('hello ', [
+                    make_element('strong', text='br'),
+                    make_element('em', text='a', tail='v'),
+                    make_element('code', text='e', tail=' world!'),
+                    ]),
+        ),
     ])
 def test_render_parse(
         texts: List[BaseText],
