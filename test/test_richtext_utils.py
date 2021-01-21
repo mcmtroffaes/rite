@@ -21,21 +21,18 @@ def _t(value: str) -> Tag:
 
 
 @pytest.mark.parametrize(
-    "text,func,result_map,result_functor_map,result_raw", [
+    "text,func,result_functor_map,result_raw", [
         (
                 Join([_s("one "), _t("two"), _s(" three")]),
                 lambda x: "*" + x + "*",
-                ['*one *', '*two*', '* three*'],
                 Join([_s("*one *"), _t("*two*"), _s("* three*")]),
                 'one two three',
         ),
     ])
 def test_text_map(
         text: BaseText, func: Callable[[str], str],
-        result_map: List[str], result_functor_map: BaseText,
-        result_raw: str
+        result_functor_map: BaseText, result_raw: str
 ):
-    assert list(map(func, text)) == result_map
     assert text_fmap(func, text) == result_functor_map
     assert text_raw(text) == result_raw
 

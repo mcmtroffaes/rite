@@ -2,6 +2,7 @@ from functools import singledispatch
 from typing import Iterable, Dict, Tuple
 
 from rite.richtext import BaseText, Join, Tag, TagType
+from rite.richtext.utils import text_iter
 
 rst_tags: Dict[TagType, Tuple[str, str]] = {
     TagType.EMPHASIS: ('*', '*'),
@@ -22,7 +23,7 @@ def escape(value: str) -> str:
 
 @singledispatch
 def render_rst(text: BaseText) -> Iterable[str]:
-    yield from map(escape, text)
+    yield from map(escape, text_iter(text))
 
 
 @render_rst.register(Tag)

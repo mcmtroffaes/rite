@@ -52,5 +52,8 @@ setup(
             'plaintext = rite.render.html:render_plaintext',
             'rst = rite.render.html:render_rst',
         ],
+        'rite.parse': [
+            'html = rite.parse.html:parse_html',
+        ],
     }
 )

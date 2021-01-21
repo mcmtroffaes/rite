@@ -13,16 +13,16 @@ tag_map: Dict[str, TagType] = dict((tag.value, tag) for tag in TagType)
 
 
 def parse_html(source: str) -> Iterable[BaseText]:
-    return parse_xml_element(fromstring(f"<html>{source}</html>"))
+    return parse_xml_etree(fromstring(f"<html>{source}</html>"))
 
 
-def parse_xml_element(element: Element) -> Iterable[BaseText]:
+def parse_xml_etree(element: Element) -> Iterable[BaseText]:
     # parse children
     children: List[BaseText] = []
     if element.text is not None:
         children.append(String(unescape(element.text)))
     for sub_element in element:
-        children.extend(parse_xml_element(sub_element))
+        children.extend(parse_xml_etree(sub_element))
     # embed in tag if need be
     tag_type = tag_map.get(element.tag)
     if tag_type is not None:

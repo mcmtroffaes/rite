@@ -1,8 +1,9 @@
 import string
+from functools import singledispatch
 from itertools import repeat, takewhile
-from typing import Callable, TypeVar, List, Optional, Iterator
+from typing import Callable, TypeVar, List, Optional, Iterator, Iterable
 
-from rite.richtext import BaseText
+from rite.richtext import BaseText, String
 
 T = TypeVar('T')
 
@@ -11,12 +12,23 @@ def text_fmap(func: Callable[[str], str], text: BaseText) -> BaseText:
     return text.fmap_iter(repeat(func))
 
 
+@singledispatch
+def text_iter(text: BaseText) -> Iterable[str]:
+    for child in text:
+        yield from text_iter(child)
+
+
+@text_iter.register
+def _text_iter_string(text: String) -> Iterable[str]:
+    yield text.value
+
+
 def text_raw(text: BaseText) -> str:
-    return ''.join(text)
+    return ''.join(text_iter(text))
 
 
 def text_is_empty(text: BaseText) -> bool:
-    return not any(map(bool, text))
+    return not any(map(bool, text_iter(text)))
 
 
 def text_is_upper(text: BaseText) -> bool:
@@ -38,7 +50,7 @@ def text_lower(text: BaseText) -> BaseText:
 def text_capitalize(text: BaseText) -> BaseText:
     def funcs() -> Iterator[Callable[[str], str]]:
         # iterate until a non-empty string is found
-        for _ in takewhile(lambda x: not x, text):
+        for _ in takewhile(lambda x: not x, text_iter(text)):
             yield lambda x: x
         # non-empty string is found! capitalize it
         yield str.capitalize
@@ -54,7 +66,7 @@ def text_capfirst(text: BaseText) -> BaseText:
 
     def funcs() -> Iterator[Callable[[str], str]]:
         # iterate until a non-empty string is found
-        for _ in takewhile(lambda x: not x, text):
+        for _ in takewhile(lambda x: not x, text_iter(text)):
             yield lambda x: x
         # non-empty string is found! capitalize first character
         yield _capfirst

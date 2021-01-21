@@ -4,7 +4,7 @@ from enum import Enum
 from typing import Callable, List, Iterable, Iterator
 
 
-class BaseText(ABC, Iterable[str]):
+class BaseText(ABC, Iterable["BaseText"]):
     """Rich text is a collection of strings with some additional formatting
     attached to it.
     """
@@ -22,8 +22,8 @@ class BaseText(ABC, Iterable[str]):
 class String(BaseText):
     value: str
 
-    def __iter__(self) -> Iterator[str]:
-        yield self.value
+    def __iter__(self) -> Iterator["BaseText"]:
+        return iter(())
 
     def fmap_iter(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
         return String(next(funcs)(self.value))
@@ -33,9 +33,8 @@ class String(BaseText):
 class Join(BaseText):
     parts: List[BaseText]
 
-    def __iter__(self) -> Iterator[str]:
-        for part in self.parts:
-            yield from part
+    def __iter__(self) -> Iterator["BaseText"]:
+        return iter(self.parts)
 
     def fmap_iter(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
         return Join([part.fmap_iter(funcs) for part in self.parts])
@@ -46,8 +45,8 @@ class Protected(BaseText):
     """Protected against content changes through :meth:`functor_map_iter`."""
     child: BaseText
 
-    def __iter__(self) -> Iterator[str]:
-        yield from self.child
+    def __iter__(self) -> Iterator["BaseText"]:
+        yield self.child
 
     def fmap_iter(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
         return self
@@ -67,8 +66,8 @@ class Tag(BaseText):
     tag: TagType
     text: BaseText
 
-    def __iter__(self) -> Iterator[str]:
-        yield from self.text
+    def __iter__(self) -> Iterator["BaseText"]:
+        yield self.text
 
     def fmap_iter(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
         return Tag(self.tag, self.text.fmap_iter(funcs))
