@@ -18,7 +18,7 @@ def text_iter(text: BaseText) -> Iterable[str]:
         yield from text_iter(child)
 
 
-@text_iter.register
+@text_iter.register(String)
 def _text_iter_string(text: String) -> Iterable[str]:
     yield text.value
 
