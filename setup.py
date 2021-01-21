@@ -46,11 +46,11 @@ setup(
     python_requires='>=3.6',
     install_requires=requires,
     entry_points={
-        'rite.backends': [
-            'html = rite.backends.html:render_html',
-            'markdown = rite.backends.html:render_markdown',
-            'plaintext = rite.backends.html:render_plaintext',
-            'rst = rite.backends.html:render_rst',
+        'rite.render': [
+            'html = rite.render.html:render_html',
+            'markdown = rite.render.html:render_markdown',
+            'plaintext = rite.render.html:render_plaintext',
+            'rst = rite.render.html:render_rst',
         ],
     }
 )

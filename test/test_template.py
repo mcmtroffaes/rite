@@ -19,7 +19,7 @@ def _s(value: str) -> String:
 
 # helper function for constructing test cases
 def _t(value: str) -> Tag:
-    return Tag(TagType.CODE, String(value))
+    return Tag(TagType.CODE, _s(value))
 
 
 def str_data() -> Node[str]:
