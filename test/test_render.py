@@ -65,21 +65,28 @@ def make_element(tag: str,
     return element
 
 
+def none_to_empty(x: Optional[str]) -> str:
+    if x is None:
+        return ''
+    else:
+        return x
+
+
 def assert_xml_etree_equal(x1, x2):
     text1, e1s = x1
     text2, e2s = x2
-    assert text1 == text2
+    assert none_to_empty(text1) == none_to_empty(text2), 'head text mismatch'
     assert len(e1s) == len(e2s)
     for e1, e2 in zip(e1s, e2s):
         assert_elements_equal(e1, e2)
 
 
 def assert_elements_equal(e1, e2):
-    assert e1.tag == e2.tag
-    assert e1.text == e2.text
-    assert e1.tail == e2.tail
-    assert e1.attrib == e2.attrib
-    assert len(e1) == len(e2)
+    assert e1.tag == e2.tag, 'tag mismatch'
+    assert none_to_empty(e1.text) == none_to_empty(e2.text), 'text mismatch'
+    assert none_to_empty(e1.tail) == none_to_empty(e2.tail), 'tail mismatch'
+    assert e1.attrib == e2.attrib, 'attrib mismatch'
+    assert len(e1) == len(e2), 'children length mismatch'
     for c1, c2 in zip(e1, e2):
         assert_elements_equal(c1, c2)
 
@@ -118,20 +125,42 @@ def assert_elements_equal(e1, e2):
                 [
                     String('hello '),
                     Tag(TagType.STRONG, String('br')),
-                    Tag(TagType.EMPHASIS, String('a')),
+                    Tag(TagType.CODE, String('a')),
                     String('v'),
-                    Tag(TagType.CODE, String('e')),
+                    Tag(TagType.EMPHASIS, String('e')),
                     String(' world!'),
                 ],
                 'hello brave world!',
-                'hello <strong>br</strong><em>a</em>v<code>e</code> world!',
-                r'hello **br***a*v`e` world\!',
-                r'hello **br***a*v``e`` world!',
+                'hello <strong>br</strong><code>a</code>v<em>e</em> world!',
+                r'hello **br**`a`v*e* world\!',
+                r'hello **br**``a``v*e* world!',
                 ('hello ', [
                     make_element('strong', text='br'),
-                    make_element('em', text='a', tail='v'),
-                    make_element('code', text='e', tail=' world!'),
+                    make_element('code', text='a', tail='v'),
+                    make_element('em', text='e', tail=' world!'),
                     ]),
+        ),
+        (
+                [
+                    Tag(TagType.STRONG, Join([
+                        String('h'),
+                        Tag(TagType.EMPHASIS, String('e')),
+                        String('l'),
+                        Tag(TagType.CODE, String('l')),
+                        String('o'),
+                        Tag(TagType.SUBSCRIPT, String('')),
+                    ])),
+                ],
+                'hello',
+                '<strong>h<em>e</em>l<code>l</code>o<sub></sub></strong>',
+                '**h*e*l`l`o<sub></sub>**',
+                '**h*e*l``l``o:sub:``**',
+                (None, [
+                    make_element('strong', text='h', children=[
+                        make_element('em', text='e', tail='l'),
+                        make_element('code', text='l', tail='o'),
+                        make_element('sub'),
+                    ])])
         ),
     ])
 def test_render_parse(
