@@ -55,7 +55,7 @@ def capfirst(child: Node[Data]) -> Node[Data]:
 
 
 def capitalize(child: Node[Data]) -> Node[Data]:
-    """A node which capitalizes the first letter of its child."""
+    """A node which capitalizes all words of its child."""
     def fmt(data: Data) -> BaseText:
         return text_capitalize(child(data))
     return fmt
