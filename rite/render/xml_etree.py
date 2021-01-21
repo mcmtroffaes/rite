@@ -15,7 +15,8 @@ def escape(value: str) -> str:
 # generates a string sequence followed by one or more xml elements
 # strings in between elements are in the "tail" attribute of each element
 @singledispatch
-def render_xml_etree(text: BaseText) -> Tuple[Optional[str], Iterable[Element]]:
+def render_xml_etree(text: BaseText
+                     ) -> Tuple[Optional[str], Iterable[Element]]:
     return ''.join(map(escape, text_iter(text))), []
 
 
