@@ -51,9 +51,11 @@ setup(
             'markdown = rite.render.html:render_markdown',
             'plaintext = rite.render.html:render_plaintext',
             'rst = rite.render.html:render_rst',
+            'xml_etree = rite.render.xml_etree:render_xml_etree',
         ],
         'rite.parse': [
             'html = rite.parse.html:parse_html',
+            'xml_etree = rite.parse.html:parse_xml_etree',
         ],
     }
 )
