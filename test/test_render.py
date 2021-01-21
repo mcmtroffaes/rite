@@ -173,3 +173,16 @@ def test_render_parse(
     assert ''.join(render_rst(Join(texts))) == rst
     assert_xml_etree_equal(render_xml_etree(Join(texts)), xml_etree)
     assert list(parse_html(html)) == texts
+
+
+# some extra tests for coverage
+@pytest.mark.parametrize(
+    "texts,xml_etree", [
+        ([String('he'), String('llo')], ('hello', [])),
+        ([Tag(TagType.EMPHASIS, String('he')), String('ll'), String('o')],
+         (None, [make_element('em', text='he', tail='llo')])),
+    ])
+def test_render_xml_etree(
+        texts: List[BaseText],
+        xml_etree: Tuple[Optional[str], Iterable[Element]]) -> None:
+    assert_xml_etree_equal(render_xml_etree(Join(texts)), xml_etree)
