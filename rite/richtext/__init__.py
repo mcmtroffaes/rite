@@ -121,18 +121,3 @@ class Rich(BaseText):
 
     def fmap_iter(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
         return dataclasses.replace(self, child=self.child.fmap_iter(funcs))
-
-
-class Symbol(Enum):
-    LINEBREAK = 'br'
-    HORIZONTAL_RULE = 'hr'
-
-
-class SymbolText(BaseText):
-    symbol: Symbol
-
-    def __iter__(self) -> Iterator[BaseText]:
-        return iter(())
-
-    def fmap_iter(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
-        return self
