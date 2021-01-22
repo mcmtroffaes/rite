@@ -1,12 +1,24 @@
 from typing import Iterable, Tuple, Optional
 from xml.etree.ElementTree import Element
 
+import pytest
+
 from rite.parse import ParseProtocol
 from rite.plugin import find_plugin
 from rite.render import RenderProtocol
 from rite.richtext import String, Tag, TagType
 
 text = Tag(TagType.EMPHASIS, String('hi'))
+
+
+def test_plugin_bad_group() -> None:
+    with pytest.raises(ImportError):
+        find_plugin('badgroup', 'html')
+
+
+def test_plugin_bad_name() -> None:
+    with pytest.raises(ImportError):
+        find_plugin('rite.render', 'badname')
 
 
 def test_plugin_render_html() -> None:
