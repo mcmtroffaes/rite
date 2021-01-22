@@ -197,7 +197,7 @@ def test_render_xml_etree(
 @pytest.mark.parametrize(
     "element,texts", [
         (make_element('sub', text=''), [Tag(TagType.SUBSCRIPT, String(''))]),
-        (make_element('sub'), []),
+        (make_element('sub'), [Tag(TagType.SUBSCRIPT, String(''))]),
     ])
 def test_parse_xml_etree(element: Element, texts: List[BaseText]) -> None:
     assert list(parse_xml_etree(element)) == texts
