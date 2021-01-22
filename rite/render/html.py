@@ -20,14 +20,12 @@ def render_html(text: BaseText) -> Iterable[str]:
 @render_html.register(Rich)
 def _rich(text: Rich) -> Iterable[str]:
     tag, properties = style_properties(text.style)
-    if tag is not None:
-        if properties:
-            yield f'<{tag} style="{properties}">'
-        else:
-            yield f"<{tag}>"
+    if properties:
+        yield f'<{tag} style="{properties}">'
+    else:
+        yield f"<{tag}>"
     yield from render_html(text.child)
-    if tag is not None:
-        yield f"</{tag}>"
+    yield f"</{tag}>"
 
 
 @render_html.register(Join)

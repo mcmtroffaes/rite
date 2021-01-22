@@ -1,9 +1,11 @@
 import html
+from enum import Enum
 from xml.etree.ElementTree import Element
-from typing import List, Iterable, Dict, Optional
+from typing import List, Iterable, Dict, Optional, Type
 
 from rite.richtext import (
-    BaseText, Rich, Join, Semantics, String, Style, FontStyle
+    BaseText, Rich, Join, Semantics, String, Style, FontStyle, FontVariant,
+    FontSize
 )
 
 
@@ -11,16 +13,40 @@ def unescape(value: str) -> str:
     return html.unescape(value)
 
 
-semantics_map: Dict[str, Semantics] = dict(
-    (tag.value, tag) for tag in Semantics)
+def _enum_map(enum: Type[Enum]):
+    return dict((x.value, x) for x in enum)
+
+
+_semantics_map: Dict[str, Semantics] = _enum_map(Semantics)
+_font_style_map: Dict[str, FontStyle] = _enum_map(FontStyle)
+_font_variant_map: Dict[str, FontVariant] = _enum_map(FontVariant)
+_font_size_map: Dict[str, FontSize] = _enum_map(FontSize)
 
 
 def element_style(element: Element) -> Optional[Style]:
+    semantics: Optional[Semantics] = _semantics_map.get(element.tag)
+    font_style: FontStyle = \
+        FontStyle.ITALIC if element.tag == 'i' else FontStyle.NORMAL
+    font_weight: int = 700 if element.tag == 'b' else 400
+    font_variant: FontVariant = FontVariant.NORMAL
+    font_size: FontSize = FontSize.MEDIUM
+    for prop in element.attrib.get("style", "").split(";"):
+        prop_name, _, prop_value = prop.partition(":")
+        if prop_name == "font-weight":
+            font_weight = int(prop_value)
+        elif prop_name == "font-style":
+            font_style = _font_style_map.get(prop_value, FontStyle.NORMAL)
+        elif prop_name == "font-variant":
+            font_variant = _font_variant_map.get(
+                prop_value, FontVariant.NORMAL)
+        elif prop_name == "font-size":
+            font_size = _font_size_map.get(prop_value, FontSize.MEDIUM)
     style = Style(
-        semantics=semantics_map.get(element.tag),
-        font_weight=700 if element.tag == 'b' else 400,
-        font_style=(
-            FontStyle.ITALIC if element.tag == 'i' else FontStyle.NORMAL),
+        semantics=semantics,
+        font_weight=font_weight,
+        font_style=font_style,
+        font_variant=font_variant,
+        font_size=font_size,
     )
     return style if style != Style() else None
 

@@ -7,10 +7,9 @@ from rite.richtext.utils import text_iter
 rst_tags: Dict[Semantics, Tuple[str, str]] = {
     Semantics.EMPHASIS: ('*', '*'),
     Semantics.STRONG: ('**', '**'),
-    Semantics.CODE: ('``', '``'),
-    Semantics.STRIKETHROUGH: ('~~', '~~'),
     Semantics.SUBSCRIPT: (':sub:`', '`'),
     Semantics.SUPERSCRIPT: (':sup:`', '`'),
+    Semantics.CODE: ('``', '``'),
 }
 
 special_chars = r"\`*:"

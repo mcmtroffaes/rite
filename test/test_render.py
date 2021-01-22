@@ -1,5 +1,5 @@
 from itertools import zip_longest
-from typing import Iterable, List, Tuple, Optional
+from typing import Iterable, List, Tuple, Optional, Dict
 from xml.etree.ElementTree import Element
 
 import pytest
@@ -13,7 +13,10 @@ from rite.render.markdown import render_markdown
 from rite.render.plaintext import render_plaintext
 from rite.render.rst import render_rst
 from rite.render.xml_etree import render_xml_etree
-from rite.richtext import String, Join, BaseText, Style, Rich, FontStyle
+from rite.richtext import (
+    String, Join, BaseText, Style, Rich,
+    Semantics, FontStyle, FontVariant, FontSize
+)
 from common import _tt, _s, _st, _em
 
 
@@ -59,8 +62,9 @@ def test_protocol_bad_rt() -> None:
 def make_element(tag: str,
                  text: Optional[str] = None,
                  children: Optional[List[Element]] = None,
-                 tail: Optional[str] = None):
-    element = Element(tag)
+                 tail: Optional[str] = None,
+                 attrib: Optional[Dict[str, str]] = None):
+    element = Element(tag, attrib=attrib if attrib is not None else {})
     element.text = text
     if children is not None:
         element.extend(children)
@@ -147,6 +151,14 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                     ])])
         ),
         (
+                [Rich(_s('hi'), Style(semantics=Semantics.MARK))],
+                'hi',
+                '<mark>hi</mark>',
+                'hi',
+                'hi',
+                (None, [make_element('mark', text='hi')]),
+        ),
+        (
                 [Rich(_s('hi'), Style(font_weight=700))],
                 'hi',
                 '<b>hi</b>',
@@ -155,13 +167,51 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 (None, [make_element('b', text='hi')]),
         ),
         (
-
                 [Rich(_s('hi'), Style(font_style=FontStyle.ITALIC))],
                 'hi',
                 '<i>hi</i>',
                 '*hi*',
                 '*hi*',
                 (None, [make_element('i', text='hi')]),
+        ),
+        (
+                [Rich(_s('hi'), Style(font_style=FontStyle.OBLIQUE))],
+                'hi',
+                '<span style="font-style:oblique">hi</span>',
+                'hi',
+                'hi',
+                (None, [make_element(
+                    'span', text='hi',
+                    attrib=dict(style="font-style:oblique"))]),
+        ),
+        (
+                [Rich(_s('hi'), Style(font_weight=900))],
+                'hi',
+                '<span style="font-weight:900">hi</span>',
+                '**hi**',
+                '**hi**',
+                (None, [make_element('span', text='hi',
+                                     attrib=dict(style='font-weight:900'))]),
+        ),
+        (
+                [Rich(_s('hi'), Style(font_variant=FontVariant.SMALL_CAPS))],
+                'hi',
+                '<span style="font-variant:small-caps">hi</span>',
+                'hi',
+                'hi',
+                (None, [make_element(
+                    'span', text='hi',
+                    attrib=dict(style='font-variant:small-caps'))]),
+        ),
+        (
+                [Rich(_s('hi'), Style(font_size=FontSize.XX_LARGE))],
+                'hi',
+                '<span style="font-size:xx-large">hi</span>',
+                'hi',
+                'hi',
+                (None, [make_element(
+                    'span', text='hi',
+                    attrib=dict(style='font-size:xx-large'))]),
         ),
     ])
 def test_render_parse(

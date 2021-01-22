@@ -7,15 +7,17 @@ from rite.richtext.utils import text_iter
 markdown_tags: Dict[Semantics, Tuple[str, str]] = {
     Semantics.EMPHASIS: ('*', '*'),
     Semantics.STRONG: ('**', '**'),
-    Semantics.MARK: ('**', '**'),
-    Semantics.DELETED: ('~~', '~~'),
-    Semantics.INSERTED: ('_', '_'),
     Semantics.SUBSCRIPT: ('<sub>', '</sub>'),
     Semantics.SUPERSCRIPT: ('<sup>', '</sup>'),
     Semantics.CODE: ('`', '`'),
-    Semantics.UNARTICULATED: ('_', '_'),
     Semantics.STRIKETHROUGH: ('~~', '~~'),
-    Semantics.VARIABLE: ('*', '*'),
+    Semantics.H1: ('\n\n# ', '\n\n'),
+    Semantics.H2: ('\n\n## ', '\n\n'),
+    Semantics.H3: ('\n\n### ', '\n\n'),
+    Semantics.H4: ('\n\n#### ', '\n\n'),
+    Semantics.H5: ('\n\n##### ', '\n\n'),
+    Semantics.H6: ('\n\n###### ', '\n\n'),
+    Semantics.PARAGRAPH: ('\n\n', '')
 }
 
 # from https://enterprise.github.com/downloads/en/markdown-cheatsheet.pdf
