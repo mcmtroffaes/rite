@@ -1,11 +1,11 @@
 import html
 from enum import Enum
 from xml.etree.ElementTree import Element
-from typing import List, Iterable, Dict, Optional, Type
+from typing import List, Iterable, Dict, Optional, Type, Any
 
 from rite.richtext import (
-    BaseText, Rich, Join, Semantics, String, Style, FontStyle, FontVariant,
-    FontSize
+    BaseText, Rich, Join, String, Style,
+    Semantics, FontStyle, FontVariant, FontSize
 )
 
 
@@ -13,7 +13,7 @@ def unescape(value: str) -> str:
     return html.unescape(value)
 
 
-def _enum_map(enum: Type[Enum]):
+def _enum_map(enum: Type[Enum]) -> Dict[str, Any]:
     return dict((x.value, x) for x in enum)
 
 
