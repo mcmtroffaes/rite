@@ -62,14 +62,6 @@ class Semantics(Enum):
     PARAGRAPH = 'p'
 
 
-@dataclasses.dataclass
-class Color:
-    """An rgb color, as a triple of numbers between 0 and 255."""
-    r: int
-    g: int
-    b: int
-
-
 class FontSize(Enum):
     MEDIUM = 'medium'
     XX_SMALL = 'xx-small'
@@ -91,24 +83,13 @@ class FontVariant(Enum):
     SMALL_CAPS = 'small-caps'
 
 
-class TextAlign(Enum):
-    LEFT = 'left'
-    RIGHT = 'right'
-    CENTER = 'center'
-    JUSTIFY = 'justify'
-
-
 @dataclasses.dataclass(frozen=True)
 class Style:
     semantics: Optional[Semantics] = None
     font_size: FontSize = FontSize.MEDIUM
-    font_family: Optional[str] = None
     font_style: FontStyle = FontStyle.NORMAL
-    font_weight: int = 400  #: 400 = normal, 700 = bold; >= 550 should be bold
+    font_weight: int = 400  #: 400 = normal, 700 = bold
     font_variant: FontVariant = FontVariant.NORMAL
-    color: Optional[Color] = None
-    background_color: Optional[Color] = None
-    text_align: Optional[TextAlign] = None
 
 
 @dataclasses.dataclass(frozen=True)
