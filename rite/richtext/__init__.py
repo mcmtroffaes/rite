@@ -59,15 +59,15 @@ class Semantics(Enum):
     H4 = 'h4'
     H5 = 'h5'
     H6 = 'h6'
-    PRE = 'pre'
     PARAGRAPH = 'p'
 
 
 @dataclasses.dataclass
 class Color:
-    r: float
-    g: float
-    b: float
+    """An rgb color, as a triple of numbers between 0 and 255."""
+    r: int
+    g: int
+    b: int
 
 
 class FontSize(Enum):

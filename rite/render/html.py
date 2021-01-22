@@ -3,6 +3,7 @@ import html
 from functools import singledispatch
 from typing import Iterable, Optional
 
+from rite.render.xml_etree import style_properties
 from rite.richtext import BaseText, Rich, Join
 from rite.richtext.utils import text_iter
 
@@ -18,10 +19,12 @@ def render_html(text: BaseText) -> Iterable[str]:
 
 @render_html.register(Rich)
 def _rich(text: Rich) -> Iterable[str]:
-    tag: Optional[str] = text.style.semantics.value \
-        if text.style.semantics is not None else None
+    tag, properties = style_properties(text.style)
     if tag is not None:
-        yield f"<{tag}>"
+        if properties:
+            yield f'<{tag} style="{properties}">'
+        else:
+            yield f"<{tag}>"
     yield from render_html(text.child)
     if tag is not None:
         yield f"</{tag}>"

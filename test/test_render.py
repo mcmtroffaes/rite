@@ -13,7 +13,7 @@ from rite.render.markdown import render_markdown
 from rite.render.plaintext import render_plaintext
 from rite.render.rst import render_rst
 from rite.render.xml_etree import render_xml_etree
-from rite.richtext import String, Join, BaseText
+from rite.richtext import String, Join, BaseText, Style, Rich, FontStyle
 from common import _tt, _s, _st, _em
 
 
@@ -100,11 +100,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
 @pytest.mark.parametrize(
     "texts,plaintext,html,markdown,rst,xml_etree", [
         (
-                [
-                    _s('hello '),
-                    _st('brave'),
-                    _s(' world!'),
-                ],
+                [_s('hello '), _st('brave'), _s(' world!')],
                 'hello brave world!',
                 'hello <strong>brave</strong> world!',
                 r'hello **brave** world\!',
@@ -113,11 +109,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                     make_element('strong', text='brave', tail=' world!')]),
         ),
         (
-                [
-                    _s('hello '),
-                    _st('"<[*]>"'),
-                    _s(' world!'),
-                ],
+                [_s('hello '), _st('"<[*]>"'), _s(' world!')],
                 'hello "<[*]>" world!',
                 'hello <strong>&quot;&lt;[*]&gt;&quot;</strong> world!',
                 r'hello **"<\[\*\]>"** world\!',
@@ -129,11 +121,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
         ),
         (
                 [
-                    _s('hello '),
-                    _st('br'),
-                    _tt('a'),
-                    _s('v'),
-                    _em('e'),
+                    _s('hello '), _st('br'), _tt('a'), _s('v'), _em('e'),
                     _s(' world!'),
                 ],
                 'hello brave world!',
@@ -147,15 +135,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                     ]),
         ),
         (
-                [
-                    _st(Join([
-                        _s('h'),
-                        _em('e'),
-                        _s('l'),
-                        _tt('l'),
-                        _s('o'),
-                    ])),
-                ],
+                [_st(Join([_s('h'), _em('e'), _s('l'), _tt('l'), _s('o')]))],
                 'hello',
                 '<strong>h<em>e</em>l<code>l</code>o</strong>',
                 '**h*e*l`l`o**',
@@ -165,6 +145,23 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                         make_element('em', text='e', tail='l'),
                         make_element('code', text='l', tail='o'),
                     ])])
+        ),
+        (
+                [Rich(_s('hi'), Style(font_weight=700))],
+                'hi',
+                '<b>hi</b>',
+                '**hi**',
+                '**hi**',
+                (None, [make_element('b', text='hi')]),
+        ),
+        (
+
+                [Rich(_s('hi'), Style(font_style=FontStyle.ITALIC))],
+                'hi',
+                '<i>hi</i>',
+                '*hi*',
+                '*hi*',
+                (None, [make_element('i', text='hi')]),
         ),
     ])
 def test_render_parse(
