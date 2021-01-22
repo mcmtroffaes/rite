@@ -88,8 +88,8 @@ class Style:
     semantics: Optional[Semantics] = None
     font_size: FontSize = FontSize.MEDIUM
     font_style: FontStyle = FontStyle.NORMAL
-    font_weight: int = 400  #: 400 = normal, 700 = bold
     font_variant: FontVariant = FontVariant.NORMAL
+    font_weight: int = 400  #: 400 = normal, 700 = bold
 
 
 @dataclasses.dataclass(frozen=True)

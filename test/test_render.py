@@ -213,6 +213,25 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                     'span', text='hi',
                     attrib=dict(style='font-size:xx-large'))]),
         ),
+        (
+                [Rich(_s('hi'), Style(
+                    semantics=Semantics.UNARTICULATED,
+                    font_size=FontSize.XX_LARGE,
+                    font_style=FontStyle.OBLIQUE,
+                    font_variant=FontVariant.SMALL_CAPS,
+                    font_weight=300,
+                ))],
+                'hi',
+                '<u style="font-size:xx-large;font-style:oblique;'
+                'font-variant:small-caps;font-weight:300">hi</u>',
+                'hi',
+                'hi',
+                (None, [make_element(
+                    'u', text='hi',
+                    attrib=dict(
+                        style='font-size:xx-large;font-style:oblique;'
+                              'font-variant:small-caps;font-weight:300'))]),
+        ),
     ])
 def test_render_parse(
         texts: List[BaseText],
