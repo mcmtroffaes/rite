@@ -54,7 +54,7 @@ def element_style(element: Element) -> Optional[Style]:
 def parse_xml_etree(element: Element) -> Iterable[BaseText]:
     # parse children
     children: List[BaseText] = []
-    if element.text is not None:
+    if element.text:
         children.append(String(unescape(element.text)))
     for sub_element in element:
         children.extend(parse_xml_etree(sub_element))
@@ -69,5 +69,5 @@ def parse_xml_etree(element: Element) -> Iterable[BaseText]:
             yield Rich(String(''), style)
     else:
         yield from children
-    if element.tail is not None:
+    if element.tail:
         yield String(unescape(element.tail))
