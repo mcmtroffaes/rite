@@ -23,7 +23,7 @@ _font_variant_map: Dict[str, FontVariant] = _enum_map(FontVariant)
 _font_size_map: Dict[str, FontSize] = _enum_map(FontSize)
 
 
-def element_style(element: Element) -> Optional[Style]:
+def element_style(element: Element) -> Style:
     semantics: Optional[Semantics] = _semantics_map.get(element.tag)
     font_style: FontStyle = \
         FontStyle.ITALIC if element.tag == 'i' else FontStyle.NORMAL
@@ -48,7 +48,7 @@ def element_style(element: Element) -> Optional[Style]:
         font_variant=font_variant,
         font_size=font_size,
     )
-    return style if style != Style() else None
+    return style
 
 
 def parse_xml_etree(element: Element) -> Iterable[BaseText]:
@@ -58,9 +58,9 @@ def parse_xml_etree(element: Element) -> Iterable[BaseText]:
         children.append(String(unescape(element.text)))
     for sub_element in element:
         children.extend(parse_xml_etree(sub_element))
-    # embed in tag if need be
+    # embed in rich style if need be
     style = element_style(element)
-    if style is not None:
+    if style != Style():
         if len(children) == 1:
             yield Rich(children[0], style)
         elif len(children) > 1:
@@ -69,5 +69,6 @@ def parse_xml_etree(element: Element) -> Iterable[BaseText]:
             yield Rich(String(''), style)
     else:
         yield from children
+    # return the tail
     if element.tail:
         yield String(unescape(element.tail))
