@@ -42,7 +42,6 @@ def style_markdown_tags(style: Style) -> Optional[Tuple[str, str]]:
     return None
 
 
-
 @singledispatch
 def render_markdown(text: BaseText) -> Iterable[str]:
     yield from map(escape, text_iter(text))

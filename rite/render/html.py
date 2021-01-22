@@ -1,7 +1,7 @@
 import html
 
 from functools import singledispatch
-from typing import Iterable, Optional
+from typing import Iterable
 
 from rite.render.xml_etree import style_properties
 from rite.richtext import BaseText, Rich, Join

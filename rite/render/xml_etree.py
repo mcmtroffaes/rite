@@ -4,7 +4,9 @@ from functools import singledispatch
 from typing import Iterable, Optional, List, Tuple
 from xml.etree.ElementTree import Element
 
-from rite.richtext import BaseText, Rich, Join, FontStyle, Style, Color, FontVariant
+from rite.richtext import (
+    BaseText, Rich, Join, FontStyle, Style, Color, FontVariant
+)
 from rite.richtext.utils import text_iter
 
 
