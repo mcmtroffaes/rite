@@ -28,7 +28,7 @@ def render_rst(text: BaseText) -> Iterable[str]:
 
 
 @render_rst.register(Rich)
-def _tag(text: Rich) -> Iterable[str]:
+def _rich(text: Rich) -> Iterable[str]:
     tags: Optional[Tuple[str, str]] = None
     if text.style.semantics is not None:
         tags = rst_tags.get(text.style.semantics)

@@ -3,7 +3,7 @@ from functools import singledispatch
 from itertools import repeat, takewhile
 from typing import Callable, TypeVar, List, Optional, Iterator, Iterable
 
-from rite.richtext import BaseText, String, Rich
+from rite.richtext import BaseText, String, Style
 
 T = TypeVar('T')
 
@@ -31,8 +31,8 @@ def text_is_empty(text: BaseText) -> bool:
     return not any(map(bool, text_iter(text)))
 
 
-def style_is_bold(text: Rich):
-    return text.style.font_weight >= 550
+def style_is_bold(style: Style):
+    return style.font_weight >= 550
 
 
 def text_is_upper(text: BaseText) -> bool:

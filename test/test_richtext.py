@@ -17,7 +17,7 @@ def test_join():
            == Join([_s('Hello'), _s(' '), _s('World')])
 
 
-def test_tag():
+def test_rich():
     x = _em('hello')
     assert list(x) == [_s('hello')]
     assert x.fmap_iter(repeat(str.capitalize)) == _em('Hello')

@@ -8,6 +8,7 @@ markdown_tags: Dict[Semantics, Tuple[str, str]] = {
     Semantics.EMPHASIS: ('*', '*'),
     Semantics.STRONG: ('**', '**'),
     Semantics.CODE: ('`', '`'),
+    Semantics.STRIKETHROUGH: ('~~', '~~'),
     Semantics.SUBSCRIPT: ('<sub>', '</sub>'),
     Semantics.SUPERSCRIPT: ('<sup>', '</sup>'),
 }
@@ -28,7 +29,7 @@ def render_markdown(text: BaseText) -> Iterable[str]:
 
 
 @render_markdown.register(Rich)
-def _tag(text: Rich) -> Iterable[str]:
+def _rich(text: Rich) -> Iterable[str]:
     tags: Optional[Tuple[str, str]] = None
     if text.style.semantics is not None:
         tags = markdown_tags[text.style.semantics]

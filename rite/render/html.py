@@ -17,7 +17,7 @@ def render_html(text: BaseText) -> Iterable[str]:
 
 
 @render_html.register(Rich)
-def _tag(text: Rich) -> Iterable[str]:
+def _rich(text: Rich) -> Iterable[str]:
     tag: Optional[str] = text.style.semantics.value \
         if text.style.semantics is not None else None
     if tag is not None:
