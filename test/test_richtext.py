@@ -1,52 +1,38 @@
 from itertools import repeat
 
-from rite.richtext import String, Tag, TagType, Join, Protected
+from rite.richtext import Join
+from common import _em, _s, _st
 
 
 def test_string():
-    x = String('hello')
+    x = _s('hello')
     assert list(x) == []
-    assert x.fmap_iter(repeat(str.capitalize)) == String('Hello')
+    assert x.fmap_iter(repeat(str.capitalize)) == _s('Hello')
 
 
 def test_join():
-    x = Join([String('hello'), String(' '), String('world')])
-    assert list(x) == [String('hello'), String(' '), String('world')]
+    x = Join([_s('hello'), _s(' '), _s('world')])
+    assert list(x) == [_s('hello'), _s(' '), _s('world')]
     assert x.fmap_iter(repeat(str.capitalize)) \
-           == Join([String('Hello'), String(' '), String('World')])
+           == Join([_s('Hello'), _s(' '), _s('World')])
 
 
 def test_tag():
-    x = Tag(TagType.EMPHASIS, String('hello'))
-    assert list(x) == [String('hello')]
-    assert x.fmap_iter(repeat(str.capitalize)) \
-           == Tag(TagType.EMPHASIS, String('Hello'))
-
-
-def test_protected():
-    x = Protected(String('hello'))
-    assert list(x) == [String('hello')]
-    assert x.fmap_iter(repeat(str.capitalize)) == x
+    x = _em('hello')
+    assert list(x) == [_s('hello')]
+    assert x.fmap_iter(repeat(str.capitalize)) == _em('Hello')
 
 
 # verify Text can contain String, Tag, and Text
 def test_join_combined():
-    x1 = Join([String('hello '),
-               Tag(TagType.STRONG, String('brave')),
-               Join([String(' world')])])
-    x2 = Join([String('HELLO '),
-               Tag(TagType.STRONG, String('BRAVE')),
-               Join([String(' WORLD')])])
+    x1 = Join([_s('hello '), _st('brave'), Join([_s(' world')])])
+    x2 = Join([_s('HELLO '), _st('BRAVE'), Join([_s(' WORLD')])])
     assert x1.fmap_iter(repeat(str.upper)) == x2
 
 
 # verify Tag can contain String, Tag, and Text
 def test_tag_combined():
-    s1 = String('hello')
-    s2 = String('HELLO')
-    x11 = Tag(TagType.EMPHASIS, s1)
-    x21 = Tag(TagType.EMPHASIS, Tag(TagType.STRONG, s1))
-    x12 = Tag(TagType.EMPHASIS, s2)
-    x22 = Tag(TagType.EMPHASIS, Tag(TagType.STRONG, s2))
-    assert x11.fmap_iter(repeat(str.upper)) == x12
-    assert x21.fmap_iter(repeat(str.upper)) == x22
+    s1 = _s('hello')
+    s2 = _s('HELLO')
+    assert _em(s1).fmap_iter(repeat(str.upper)) == _em(s2)
+    assert _em(_st(s1)).fmap_iter(repeat(str.upper)) == _em(_st(s2))

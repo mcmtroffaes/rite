@@ -5,7 +5,10 @@ if sys.version_info >= (3, 8):
 else:
     from typing_extensions import Protocol
 
-from rite.richtext import BaseText, String, Join, Tag, TagType
+from rite.richtext import (
+    BaseText, String, Join, Rich, Style,
+    Semantics, FontSize, FontStyle, FontVariant, Color, TextAlign,
+)
 from rite.richtext.utils import (
     list_join, text_capfirst, text_lower, text_upper, text_capitalize,
 )
@@ -40,10 +43,30 @@ def join(children: List[Node[Data]],
     return fmt
 
 
-def tag(tag_: TagType, child: Node[Data]) -> Node[Data]:
+def rich(
+        child: Node[Data],
+        semantics: Optional[Semantics] = None,
+        font_size: FontSize = FontSize.MEDIUM,
+        font_family: Optional[str] = None,
+        font_style: FontStyle = FontStyle.NORMAL,
+        font_weight: int = 400,
+        font_variant: FontVariant = FontVariant.NORMAL,
+        color: Optional[Color] = None,
+        background_color: Optional[Color] = None,
+        text_align: Optional[TextAlign] = None) -> Node[Data]:
     """A node which adds a tag to its child."""
     def fmt(data: Data) -> BaseText:
-        return Tag(tag=tag_, child=child(data))
+        return Rich(child=child(data), style=Style(
+            semantics=semantics,
+            font_size=font_size,
+            font_family=font_family,
+            font_style=font_style,
+            font_weight=font_weight,
+            font_variant=font_variant,
+            color=color,
+            background_color=background_color,
+            text_align=text_align,
+        ))
     return fmt
 
 

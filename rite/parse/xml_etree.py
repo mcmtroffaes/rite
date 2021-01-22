@@ -1,15 +1,28 @@
 import html
 from xml.etree.ElementTree import Element
-from typing import List, Iterable, Dict
+from typing import List, Iterable, Dict, Optional
 
-from rite.richtext import BaseText, Tag, Join, TagType, String
+from rite.richtext import (
+    BaseText, Rich, Join, Semantics, String, Style, FontStyle
+)
 
 
 def unescape(value: str) -> str:
     return html.unescape(value)
 
 
-tag_map: Dict[str, TagType] = dict((tag.value, tag) for tag in TagType)
+semantics_map: Dict[str, Semantics] = dict(
+    (tag.value, tag) for tag in Semantics)
+
+
+def element_style(element: Element) -> Optional[Style]:
+    style = Style(
+        semantics=semantics_map.get(element.tag),
+        font_weight=700 if element.tag == 'b' else 400,
+        font_style=(
+            FontStyle.ITALIC if element.tag == 'i' else FontStyle.NORMAL),
+    )
+    return style if style != Style() else None
 
 
 def parse_xml_etree(element: Element) -> Iterable[BaseText]:
@@ -20,14 +33,14 @@ def parse_xml_etree(element: Element) -> Iterable[BaseText]:
     for sub_element in element:
         children.extend(parse_xml_etree(sub_element))
     # embed in tag if need be
-    tag_type = tag_map.get(element.tag)
-    if tag_type is not None:
+    style = element_style(element)
+    if style is not None:
         if len(children) == 1:
-            yield Tag(tag_type, children[0])
+            yield Rich(children[0], style)
         elif len(children) > 1:
-            yield Tag(tag_type, Join(children))
+            yield Rich(Join(children), style)
         else:
-            yield Tag(tag_type, String(''))
+            yield Rich(String(''), style)
     else:
         yield from children
     if element.tail is not None:

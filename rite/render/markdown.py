@@ -1,15 +1,15 @@
 from functools import singledispatch
-from typing import Iterable, Dict, Tuple
+from typing import Iterable, Dict, Tuple, Optional
 
-from rite.richtext import BaseText, Join, Tag, TagType
+from rite.richtext import BaseText, Join, Rich, Semantics
 from rite.richtext.utils import text_iter
 
-markdown_tags: Dict[TagType, Tuple[str, str]] = {
-    TagType.EMPHASIS: ('*', '*'),
-    TagType.STRONG: ('**', '**'),
-    TagType.CODE: ('`', '`'),
-    TagType.SUBSCRIPT: ('<sub>', '</sub>'),
-    TagType.SUPERSCRIPT: ('<sup>', '</sup>'),
+markdown_tags: Dict[Semantics, Tuple[str, str]] = {
+    Semantics.EMPHASIS: ('*', '*'),
+    Semantics.STRONG: ('**', '**'),
+    Semantics.CODE: ('`', '`'),
+    Semantics.SUBSCRIPT: ('<sub>', '</sub>'),
+    Semantics.SUPERSCRIPT: ('<sup>', '</sup>'),
 }
 
 # from https://enterprise.github.com/downloads/en/markdown-cheatsheet.pdf
@@ -27,12 +27,16 @@ def render_markdown(text: BaseText) -> Iterable[str]:
     yield from map(escape, text_iter(text))
 
 
-@render_markdown.register(Tag)
-def _tag(text: Tag) -> Iterable[str]:
-    tags = markdown_tags[text.tag]
-    yield tags[0]
+@render_markdown.register(Rich)
+def _tag(text: Rich) -> Iterable[str]:
+    tags: Optional[Tuple[str, str]] = None
+    if text.style.semantics is not None:
+        tags = markdown_tags[text.style.semantics]
+    if tags is not None:
+        yield tags[0]
     yield from render_markdown(text.child)
-    yield tags[1]
+    if tags is not None:
+        yield tags[1]
 
 
 @render_markdown.register(Join)

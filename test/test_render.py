@@ -13,7 +13,8 @@ from rite.render.markdown import render_markdown
 from rite.render.plaintext import render_plaintext
 from rite.render.rst import render_rst
 from rite.render.xml_etree import render_xml_etree
-from rite.richtext import String, Tag, TagType, Join, BaseText
+from rite.richtext import String, Join, BaseText
+from common import _tt, _s, _st, _em
 
 
 def test_protocol() -> None:
@@ -23,7 +24,7 @@ def test_protocol() -> None:
     render_markdown_protocol: RenderProtocol[Iterable[str]] = render_markdown
     render_rst_protocol: RenderProtocol[Iterable[str]] = render_rst
     parse_html_protocol: ParseProtocol[str] = parse_html
-    s = Tag(TagType.CODE, String('xmas'))
+    s = _tt('xmas')
     assert ''.join(render_html_protocol(s)) == '<code>xmas</code>'
     assert ''.join(render_text_protocol(s)) == 'xmas'
     assert ''.join(render_markdown_protocol(s)) == '`xmas`'
@@ -100,9 +101,9 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
     "texts,plaintext,html,markdown,rst,xml_etree", [
         (
                 [
-                    String('hello '),
-                    Tag(TagType.STRONG, String('brave')),
-                    String(' world!'),
+                    _s('hello '),
+                    _st('brave'),
+                    _s(' world!'),
                 ],
                 'hello brave world!',
                 'hello <strong>brave</strong> world!',
@@ -113,9 +114,9 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
         ),
         (
                 [
-                    String('hello '),
-                    Tag(TagType.STRONG, String('"<[*]>"')),
-                    String(' world!'),
+                    _s('hello '),
+                    _st('"<[*]>"'),
+                    _s(' world!'),
                 ],
                 'hello "<[*]>" world!',
                 'hello <strong>&quot;&lt;[*]&gt;&quot;</strong> world!',
@@ -128,12 +129,12 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
         ),
         (
                 [
-                    String('hello '),
-                    Tag(TagType.STRONG, String('br')),
-                    Tag(TagType.CODE, String('a')),
-                    String('v'),
-                    Tag(TagType.EMPHASIS, String('e')),
-                    String(' world!'),
+                    _s('hello '),
+                    _st('br'),
+                    _tt('a'),
+                    _s('v'),
+                    _em('e'),
+                    _s(' world!'),
                 ],
                 'hello brave world!',
                 'hello <strong>br</strong><code>a</code>v<em>e</em> world!',
@@ -147,12 +148,12 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
         ),
         (
                 [
-                    Tag(TagType.STRONG, Join([
-                        String('h'),
-                        Tag(TagType.EMPHASIS, String('e')),
-                        String('l'),
-                        Tag(TagType.CODE, String('l')),
-                        String('o'),
+                    _st(Join([
+                        _s('h'),
+                        _em('e'),
+                        _s('l'),
+                        _tt('l'),
+                        _s('o'),
                     ])),
                 ],
                 'hello',
@@ -182,10 +183,10 @@ def test_render_parse(
 @pytest.mark.parametrize(
     "texts,xml_etree", [
         ([String('he'), String('llo')], ('hello', [])),
-        ([Tag(TagType.EMPHASIS, String('he')), String('ll'), String('o')],
+        ([_em('he'), String('ll'), String('o')],
          (None, [make_element('em', text='he', tail='llo')])),
-        ([Tag(TagType.SUBSCRIPT, String(''))],
-         (None, [make_element('sub', text='')])),
+        ([_em('')],
+         (None, [make_element('em', text='')])),
     ])
 def test_render_xml_etree(
         texts: List[BaseText],
@@ -196,8 +197,8 @@ def test_render_xml_etree(
 # some extra tests for coverage
 @pytest.mark.parametrize(
     "element,texts", [
-        (make_element('sub', text=''), [Tag(TagType.SUBSCRIPT, String(''))]),
-        (make_element('sub'), [Tag(TagType.SUBSCRIPT, String(''))]),
+        (make_element('em', text=''), [_em('')]),
+        (make_element('em'), [_em('')]),
     ])
 def test_parse_xml_etree(element: Element, texts: List[BaseText]) -> None:
     assert list(parse_xml_etree(element)) == texts

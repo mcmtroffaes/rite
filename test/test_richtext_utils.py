@@ -2,30 +2,21 @@ from typing import Callable, List, Dict
 
 import pytest
 
-from rite.richtext import String, Join, Tag, TagType, BaseText
+from rite.richtext import Join, BaseText
 from rite.richtext.utils import (
     list_join, text_fmap, text_raw, text_is_empty,
     text_is_lower, text_is_upper, text_lower, text_upper,
     text_capitalize, text_capfirst,
 )
-
-
-# helper function for constructing test cases
-def _s(value: str) -> String:
-    return String(value)
-
-
-# helper function for constructing test cases
-def _t(value: str) -> Tag:
-    return Tag(TagType.CODE, String(value))
+from common import _s, _em
 
 
 @pytest.mark.parametrize(
     "text,func,result_functor_map,result_raw", [
         (
-                Join([_s("one "), _t("two"), _s(" three")]),
+                Join([_s("one "), _em("two"), _s(" three")]),
                 lambda x: "*" + x + "*",
-                Join([_s("*one *"), _t("*two*"), _s("* three*")]),
+                Join([_s("*one *"), _em("*two*"), _s("* three*")]),
                 'one two three',
         ),
     ])
@@ -40,8 +31,8 @@ def test_text_map(
 @pytest.mark.parametrize("text,is_empty", [
     (_s(''), True),
     (_s('hello'), False),
-    (_t(''), True),
-    (_t('hello'), False),
+    (_em(''), True),
+    (_em('hello'), False),
     (Join([]), True),
     (Join([_s('')]), True),
     (Join([_s(''), _s('hello')]), False),
@@ -55,9 +46,9 @@ def test_text_is_empty(text: BaseText, is_empty: bool):
     (_s('hello'), True, False),
     (_s('HELLO'), False, True),
     (_s('heLLO'), False, False),
-    (_t('hello'), True, False),
-    (_t('HELLO'), False, True),
-    (_t('heLLO'), False, False),
+    (_em('hello'), True, False),
+    (_em('HELLO'), False, True),
+    (_em('heLLO'), False, False),
     (Join([_s('hello'), _s(' world')]), True, False),
     (Join([_s('HELLO'), _s(' WORLD')]), False, True),
     (Join([_s('hello'), _s(' WORLD')]), False, False),
@@ -74,9 +65,9 @@ def test_text_is_lower_upper(text: BaseText, is_lower: bool, is_upper: bool):
     (_s('hello'), _s('hello'), _s('HELLO')),
     (_s('HELLO'), _s('hello'), _s('HELLO')),
     (_s('heLLO'), _s('hello'), _s('HELLO')),
-    (_t('hello'), _t('hello'), _t('HELLO')),
-    (_t('HELLO'), _t('hello'), _t('HELLO')),
-    (_t('heLLO'), _t('hello'), _t('HELLO')),
+    (_em('hello'), _em('hello'), _em('HELLO')),
+    (_em('HELLO'), _em('hello'), _em('HELLO')),
+    (_em('heLLO'), _em('hello'), _em('HELLO')),
     (
             Join([_s('hello'), _s(' world')]),
             Join([_s('hello'), _s(' world')]),
@@ -102,9 +93,10 @@ def test_text_lower_upper(text: BaseText, lower: BaseText, upper: BaseText):
     (Join([]), Join([])),
     (_s(''), _s('')),
     (_s('heLLO'), _s('Hello')),
-    (_t('heLLO'), _t('Hello')),
-    (Join([_s(''), _t('heLLO')]), Join([_s(''), _t('Hello')])),
-    (Join([_s(''), _t('heL'), _s('LO')]), Join([_s(''), _t('Hel'), _s('lo')])),
+    (_em('heLLO'), _em('Hello')),
+    (Join([_s(''), _em('heLLO')]), Join([_s(''), _em('Hello')])),
+    (Join([_s(''), _em('heL'), _s('LO')]),
+     Join([_s(''), _em('Hel'), _s('lo')])),
 ])
 def test_text_capitalize(text: BaseText, result: BaseText):
     assert text_capitalize(text) == result
@@ -114,9 +106,10 @@ def test_text_capitalize(text: BaseText, result: BaseText):
     (Join([]), Join([])),
     (_s(''), _s('')),
     (_s('heLLO'), _s('HeLLO')),
-    (_t('heLLO'), _t('HeLLO')),
-    (Join([_s(''), _t('heLLO')]), Join([_s(''), _t('HeLLO')])),
-    (Join([_s(''), _t('heL'), _s('LO')]), Join([_s(''), _t('HeL'), _s('LO')])),
+    (_em('heLLO'), _em('HeLLO')),
+    (Join([_s(''), _em('heLLO')]), Join([_s(''), _em('HeLLO')])),
+    (Join([_s(''), _em('heL'), _s('LO')]),
+     Join([_s(''), _em('HeL'), _s('LO')])),
 ])
 def test_text_capfirst(text: BaseText, result: BaseText):
     assert text_capfirst(text) == result

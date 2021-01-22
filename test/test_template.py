@@ -1,25 +1,18 @@
 import dataclasses
 import datetime
 import sys
+
+from common import _tt, _s, _em, _st
+
 if sys.version_info >= (3, 8):
     from typing import Protocol
 else:
     from typing_extensions import Protocol
 
-from rite.richtext import BaseText, String, TagType, Tag, Join
+from rite.richtext import BaseText, String, Semantics, Join
 from rite.style.template import (
-    Node, tag, str_, join, capfirst, capitalize, lower, upper
+    Node, rich, str_, join, capfirst, capitalize, lower, upper
 )
-
-
-# helper function for constructing test cases
-def _s(value: str) -> String:
-    return String(value)
-
-
-# helper function for constructing test cases
-def _t(value: str) -> Tag:
-    return Tag(TagType.CODE, _s(value))
 
 
 def str_data() -> Node[str]:
@@ -27,7 +20,7 @@ def str_data() -> Node[str]:
     This node returns the data marked up as code.
     """
     def fmt(data: str) -> BaseText:
-        return _t(data)
+        return _tt(data)
     return fmt
 
 
@@ -71,14 +64,14 @@ class PersonWithGender:
 
 def test_template() -> None:
     template: Node[str] = join([str_data(), str_(' world')])
-    assert template('hello') == Join([_t('hello'), _s(' world')])
+    assert template('hello') == Join([_tt('hello'), _s(' world')])
 
 
 def test_protocol() -> None:
     template: Node[PersonProtocol] = join([
-        tag(TagType.EMPHASIS, name()),
+        rich(name(), semantics=Semantics.EMPHASIS),
         str_(': '),
-        tag(TagType.STRONG, birthday("%b %d, %Y"))])
+        rich(birthday("%b %d, %Y"), semantics=Semantics.STRONG)])
     person1 = Person(
         name='John', birthday=datetime.date(year=1998, month=3, day=7))
     person2 = PersonWithGender(
@@ -87,30 +80,30 @@ def test_protocol() -> None:
     text1 = template(person1)
     text2 = template(person2)
     assert text1 == Join([
-        Tag(TagType.EMPHASIS, _s('John')),
+        _em('John'),
         _s(': '),
-        Tag(TagType.STRONG, _s('Mar 07, 1998'))])
+        _st('Mar 07, 1998')])
     assert text2 == Join([
-        Tag(TagType.EMPHASIS, _s('Mary')),
+        _em('Mary'),
         _s(': '),
-        Tag(TagType.STRONG, _s('Jun 22, 1997'))])
+        _st('Jun 22, 1997')])
 
 
 def test_capfirst():
     template = capfirst(join([str_(''), str_data(), str_(' world')]))
-    assert template('hello') == Join([_s(''), _t('Hello'), _s(' world')])
+    assert template('hello') == Join([_s(''), _tt('Hello'), _s(' world')])
 
 
 def test_capitalize():
     template = capitalize(join([str_(''), str_data(), str_(' WORLD')]))
-    assert template('heLLo') == Join([_s(''), _t('Hello'), _s(' world')])
+    assert template('heLLo') == Join([_s(''), _tt('Hello'), _s(' world')])
 
 
 def test_lower():
     template = lower(join([str_(''), str_data(), str_(' WORLD')]))
-    assert template('heLLo') == Join([_s(''), _t('hello'), _s(' world')])
+    assert template('heLLo') == Join([_s(''), _tt('hello'), _s(' world')])
 
 
 def test_upper():
     template = upper(join([str_(''), str_data(), str_(' WORLD')]))
-    assert template('heLLo') == Join([_s(''), _t('HELLO'), _s(' WORLD')])
+    assert template('heLLo') == Join([_s(''), _tt('HELLO'), _s(' WORLD')])

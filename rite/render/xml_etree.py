@@ -4,7 +4,7 @@ from functools import singledispatch
 from typing import Iterable, Optional, List, Tuple
 from xml.etree.ElementTree import Element
 
-from rite.richtext import BaseText, Tag, Join
+from rite.richtext import BaseText, Rich, Join
 from rite.richtext.utils import text_iter
 
 
@@ -20,9 +20,12 @@ def render_xml_etree(text: BaseText
     return ''.join(map(escape, text_iter(text))), []
 
 
-@render_xml_etree.register(Tag)
-def _tag(text: Tag) -> Tuple[Optional[str], Iterable[Element]]:
-    element = Element(text.tag.value)
+@render_xml_etree.register(Rich)
+def _tag(text: Rich) -> Tuple[Optional[str], Iterable[Element]]:
+    tag: str = 'span'
+    if text.style.semantics is not None:
+        tag = text.style.semantics.value
+    element = Element(tag)
     element.text, children = render_xml_etree(text.child)
     element.extend(children)
     return None, [element]

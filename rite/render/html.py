@@ -1,9 +1,9 @@
 import html
 
 from functools import singledispatch
-from typing import Iterable
+from typing import Iterable, Optional
 
-from rite.richtext import BaseText, Tag, Join
+from rite.richtext import BaseText, Rich, Join
 from rite.richtext.utils import text_iter
 
 
@@ -16,11 +16,15 @@ def render_html(text: BaseText) -> Iterable[str]:
     yield from map(escape, text_iter(text))
 
 
-@render_html.register(Tag)
-def _tag(text: Tag) -> Iterable[str]:
-    yield f"<{text.tag.value}>"
+@render_html.register(Rich)
+def _tag(text: Rich) -> Iterable[str]:
+    tag: Optional[str] = text.style.semantics.value \
+        if text.style.semantics is not None else None
+    if tag is not None:
+        yield f"<{tag}>"
     yield from render_html(text.child)
-    yield f"</{text.tag.value}>"
+    if tag is not None:
+        yield f"</{tag}>"
 
 
 @render_html.register(Join)
