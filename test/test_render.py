@@ -9,6 +9,7 @@ from rite.parse.html import parse_html
 from rite.parse.xml_etree import parse_xml_etree
 from rite.render import RenderProtocol
 from rite.render.html import render_html
+from rite.render.latex import render_latex
 from rite.render.markdown import render_markdown
 from rite.render.plaintext import render_plaintext
 from rite.render.rst import render_rst
@@ -102,13 +103,14 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
 
 
 @pytest.mark.parametrize(
-    "texts,plaintext,html,markdown,rst,xml_etree", [
+    "texts,plaintext,html,markdown,rst,latex,xml_etree", [
         (
                 [_s('hello '), _st('brave'), _s(' world!')],
                 'hello brave world!',
                 'hello <strong>brave</strong> world!',
                 r'hello **brave** world\!',
                 r'hello **brave** world!',
+                r'hello \textbf{brave} world!',
                 ('hello ', [
                     make_element('strong', text='brave', tail=' world!')]),
         ),
@@ -118,6 +120,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 'hello <strong>&quot;&lt;[*]&gt;&quot;</strong> world!',
                 r'hello **"<\[\*\]>"** world\!',
                 r'hello **"<[\*]>"** world!',
+                r'hello \textbf{"<[*]>"} world!',
                 ('hello ', [
                     make_element(
                         'strong',
@@ -132,6 +135,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 'hello <strong>br</strong><code>a</code>v<em>e</em> world!',
                 r'hello **br**`a`v*e* world\!',
                 r'hello **br**``a``v*e* world!',
+                r'hello \textbf{br}\texttt{a}v\emph{e} world!',
                 ('hello ', [
                     make_element('strong', text='br'),
                     make_element('code', text='a', tail='v'),
@@ -144,6 +148,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 '<strong>h<em>e</em>l<code>l</code>o</strong>',
                 '**h*e*l`l`o**',
                 '**h*e*l``l``o**',
+                r'\textbf{h\emph{e}l\texttt{l}o}',
                 (None, [
                     make_element('strong', text='h', children=[
                         make_element('em', text='e', tail='l'),
@@ -156,6 +161,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 '<mark>hi</mark>',
                 'hi',
                 'hi',
+                'hi',
                 (None, [make_element('mark', text='hi')]),
         ),
         (
@@ -164,6 +170,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 '<b>hi</b>',
                 '**hi**',
                 '**hi**',
+                r'\textbf{hi}',
                 (None, [make_element('b', text='hi')]),
         ),
         (
@@ -172,6 +179,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 '<i>hi</i>',
                 '*hi*',
                 '*hi*',
+                r'\textit{hi}',
                 (None, [make_element('i', text='hi')]),
         ),
         (
@@ -180,6 +188,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 '<span style="font-style:oblique">hi</span>',
                 'hi',
                 'hi',
+                r'\textsl{hi}',
                 (None, [make_element(
                     'span', text='hi',
                     attrib=dict(style="font-style:oblique"))]),
@@ -190,6 +199,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 '<span style="font-weight:900">hi</span>',
                 '**hi**',
                 '**hi**',
+                r'\textbf{hi}',
                 (None, [make_element('span', text='hi',
                                      attrib=dict(style='font-weight:900'))]),
         ),
@@ -199,6 +209,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 '<span style="font-variant:small-caps">hi</span>',
                 'hi',
                 'hi',
+                r'\textsc{hi}',
                 (None, [make_element(
                     'span', text='hi',
                     attrib=dict(style='font-variant:small-caps'))]),
@@ -209,6 +220,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 '<span style="font-size:xx-large">hi</span>',
                 'hi',
                 'hi',
+                r'\LARGE{hi}',
                 (None, [make_element(
                     'span', text='hi',
                     attrib=dict(style='font-size:xx-large'))]),
@@ -226,6 +238,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 'font-variant:small-caps;font-weight:300">hi</u>',
                 'hi',
                 'hi',
+                r'\textsc{\textsl{\LARGE{\underline{hi}}}}',
                 (None, [make_element(
                     'u', text='hi',
                     attrib=dict(
@@ -235,12 +248,13 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
     ])
 def test_render_parse(
         texts: List[BaseText],
-        plaintext: str, html: str, markdown: str, rst: str,
+        plaintext: str, html: str, markdown: str, rst: str, latex: str,
         xml_etree: Tuple[Optional[str], Iterable[Element]]) -> None:
     assert ''.join(render_plaintext(Join(texts))) == plaintext
     assert ''.join(render_html(Join(texts))) == html
     assert ''.join(render_markdown(Join(texts))) == markdown
     assert ''.join(render_rst(Join(texts))) == rst
+    assert ''.join(map(str, render_latex(Join(texts)))) == latex
     assert_xml_etree_equal(render_xml_etree(Join(texts)), xml_etree)
     assert list(parse_html(html)) == texts
 
