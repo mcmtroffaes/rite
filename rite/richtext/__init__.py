@@ -37,7 +37,8 @@ class Join(BaseText):
         return iter(self.children)
 
     def fmap_iter(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
-        return Join([child.fmap_iter(funcs) for child in self.children])
+        children = [child.fmap_iter(funcs) for child in self.children]
+        return dataclasses.replace(self, children=children)
 
 
 class Semantics(Enum):
