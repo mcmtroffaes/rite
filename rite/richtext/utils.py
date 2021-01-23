@@ -1,5 +1,4 @@
 import string
-from functools import singledispatch
 from itertools import repeat, takewhile
 from typing import Callable, TypeVar, List, Optional, Iterator, Iterable
 
@@ -20,7 +19,6 @@ def text_fmap(func: Callable[[str], str], text: Text) -> Text:
     return text_fmap_iter(text, repeat(func))
 
 
-@singledispatch
 def text_iter(text: Text) -> Iterable[str]:
     if isinstance(text, str):
         yield text
