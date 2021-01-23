@@ -240,35 +240,49 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                     attrib=dict(style='font-size:xx-large'))]),
         ),
         (
-                [FontWeight(
-                    FontVariant(
-                        FontStyle(
-                            FontSize(
-                                Semantic(_s('hi'), Semantics.UNARTICULATED),
-                                FontSizes.XX_LARGE),
-                            FontStyles.OBLIQUE),
-                        FontVariants.SMALL_CAPS),
-                    300)],
-                'hi',
-                '<u style="font-size:xx-large;font-style:oblique;'
-                'font-variant:small-caps;font-weight:300">hi</u>',
-                'hi',
-                'hi',
-                r'\textsc{\textsl{\LARGE{\underline{hi}}}}',
-                FontWeight(
-                    FontVariant(
-                        FontStyle(
-                            FontSize(
-                                Semantic(_s('hi'), Semantics.UNARTICULATED),
-                                FontSizes.XX_LARGE),
-                            FontStyles.OBLIQUE),
-                        FontVariants.SMALL_CAPS),
-                    300),
-                (None, [make_element(
-                    'u', text='hi',
-                    attrib=dict(
-                        style='font-size:xx-large;font-style:oblique;'
-                              'font-variant:small-caps;font-weight:300'))]),
+            [FontWeight(
+                FontVariant(
+                    FontStyle(
+                        FontSize(
+                            Semantic(_s('hi'), Semantics.UNARTICULATED),
+                            FontSizes.XX_LARGE),
+                        FontStyles.OBLIQUE),
+                    FontVariants.SMALL_CAPS),
+                300)],
+            'hi',
+            '<span style="font-weight:300">'
+            '<span style="font-variant:small-caps">'
+            '<span style="font-style:oblique">'
+            '<span style="font-size:xx-large">'
+            '<u>hi</u>'
+            '</span></span></span></span>',
+            'hi',
+            'hi',
+            r'\textmd{\textsc{\textsl{\LARGE{\underline{hi}}}}}',
+            FontWeight(
+                FontVariant(
+                    FontStyle(
+                        FontSize(
+                            Semantic(_s('hi'), Semantics.UNARTICULATED),
+                            FontSizes.XX_LARGE),
+                        FontStyles.OBLIQUE),
+                    FontVariants.SMALL_CAPS),
+                400),
+            (None, [make_element(
+                'span', attrib=dict(style="font-weight:300"),
+                children=[make_element(
+                    'span', attrib=dict(style="font-variant:small-caps"),
+                    children=[make_element(
+                        'span', attrib=dict(style="font-style:oblique"),
+                        children=[make_element(
+                            'span', attrib=dict(style="font-size:xx-large"),
+                            children=[make_element(
+                                'u', text='hi'
+                            )]
+                        )]
+                    )]
+                )]
+            )])
         ),
     ])
 def test_render_parse(

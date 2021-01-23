@@ -60,6 +60,7 @@ style_map: Dict[str, Callable[[BaseText], BaseText]] = {
     'large': font_size_style(FontSizes.LARGE),
     'Large': font_size_style(FontSizes.X_LARGE),
     'LARGE': font_size_style(FontSizes.XX_LARGE),
+    'textmd': font_weight_style(400),
     'textbf': font_weight_style(700),
     'textit': font_style_style(FontStyles.ITALIC),
     'textsl': font_style_style(FontStyles.OBLIQUE),
