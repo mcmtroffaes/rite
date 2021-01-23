@@ -89,21 +89,21 @@ def test_protocol() -> None:
         _st('Jun 22, 1997')])
 
 
-def test_capfirst():
-    template = capfirst(join([str_(''), str_data(), str_(' world')]))
+def test_capfirst() -> None:
+    template: Node = capfirst(join([str_(''), str_data(), str_(' world')]))
     assert template('hello') == Join([_s(''), _tt('Hello'), _s(' world')])
 
 
-def test_capitalize():
-    template = capitalize(join([str_(''), str_data(), str_(' WORLD')]))
+def test_capitalize() -> None:
+    template: Node = capitalize(join([str_(''), str_data(), str_(' WORLD')]))
     assert template('heLLo') == Join([_s(''), _tt('Hello'), _s(' world')])
 
 
-def test_lower():
-    template = lower(join([str_(''), str_data(), str_(' WORLD')]))
+def test_lower() -> None:
+    template: Node = lower(join([str_(''), str_data(), str_(' WORLD')]))
     assert template('heLLo') == Join([_s(''), _tt('hello'), _s(' world')])
 
 
-def test_upper():
-    template = upper(join([str_(''), str_data(), str_(' WORLD')]))
+def test_upper() -> None:
+    template: Node = upper(join([str_(''), str_data(), str_(' WORLD')]))
     assert template('heLLo') == Join([_s(''), _tt('HELLO'), _s(' WORLD')])

@@ -10,11 +10,7 @@ class BaseText(ABC, Iterable["BaseText"]):
     """
 
     @abstractmethod
-    def fmap_iter(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
-        """Apply the iterator *funcs* of functions consecutively to each string
-        in the text and return the resulting rich text, retaining the original
-        markup.
-        """
+    def replace(self, children: Iterable["BaseText"]) -> "BaseText":
         raise NotImplementedError
 
 
@@ -25,8 +21,8 @@ class String(BaseText):
     def __iter__(self) -> Iterator["BaseText"]:
         return iter(())
 
-    def fmap_iter(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
-        return String(next(funcs)(self.value))
+    def replace(self, children: Iterable["BaseText"]) -> "BaseText":
+        pass
 
 
 @dataclasses.dataclass(frozen=True)
@@ -36,9 +32,8 @@ class Join(BaseText):
     def __iter__(self) -> Iterator["BaseText"]:
         return iter(self.children)
 
-    def fmap_iter(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
-        children = [child.fmap_iter(funcs) for child in self.children]
-        return dataclasses.replace(self, children=children)
+    def replace(self, children: Iterable["BaseText"]) -> "BaseText":
+        return dataclasses.replace(self, children=list(children))
 
 
 @dataclasses.dataclass(frozen=True)
@@ -48,8 +43,8 @@ class Child(BaseText):
     def __iter__(self) -> Iterator["BaseText"]:
         yield self.child
 
-    def fmap_iter(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
-        return dataclasses.replace(self, child=self.child.fmap_iter(funcs))
+    def replace(self, children: Iterable["BaseText"]) -> "BaseText":
+        return dataclasses.replace(self, child=next(iter(children)))
 
 
 class Semantics(Enum):

@@ -8,27 +8,39 @@ from rite.richtext import BaseText, String
 T = TypeVar('T')
 
 
+@singledispatch
+def text_fmap_iter(text: BaseText, funcs: Iterator[Callable[[str], str]]
+                   ) -> BaseText:
+    return text.replace(text_fmap_iter(child, funcs) for child in text)
+
+
+@text_fmap_iter.register(String)
+def _text_fmap_iter_string(text: String, funcs: Iterator[Callable[[str], str]]
+                           ) -> BaseText:
+    return String(next(funcs)(text.value))
+
+
 def text_fmap(func: Callable[[str], str], text: BaseText) -> BaseText:
-    return text.fmap_iter(repeat(func))
+    return text_fmap_iter(text, repeat(func))
 
 
 @singledispatch
-def text_iter(text: BaseText) -> Iterable[str]:
+def iter_strings(text: BaseText) -> Iterable[str]:
     for child in text:
-        yield from text_iter(child)
+        yield from iter_strings(child)
 
 
-@text_iter.register(String)
-def _text_iter_string(text: String) -> Iterable[str]:
+@iter_strings.register(String)
+def _iter_strings_string(text: String) -> Iterable[str]:
     yield text.value
 
 
 def text_raw(text: BaseText) -> str:
-    return ''.join(text_iter(text))
+    return ''.join(iter_strings(text))
 
 
 def text_is_empty(text: BaseText) -> bool:
-    return not any(map(bool, text_iter(text)))
+    return not any(map(bool, iter_strings(text)))
 
 
 def text_is_upper(text: BaseText) -> bool:
@@ -50,13 +62,13 @@ def text_lower(text: BaseText) -> BaseText:
 def text_capitalize(text: BaseText) -> BaseText:
     def funcs() -> Iterator[Callable[[str], str]]:
         # iterate until a non-empty string is found
-        for _ in takewhile(lambda x: not x, text_iter(text)):
+        for _ in takewhile(lambda x: not x, iter_strings(text)):
             yield lambda x: x
         # non-empty string is found! capitalize it
         yield str.capitalize
         # convert the rest to lower case
         yield from repeat(str.lower)
-    return text.fmap_iter(funcs())
+    return text_fmap_iter(text, funcs())
 
 
 def text_capfirst(text: BaseText) -> BaseText:
@@ -66,14 +78,14 @@ def text_capfirst(text: BaseText) -> BaseText:
 
     def funcs() -> Iterator[Callable[[str], str]]:
         # iterate until a non-empty string is found
-        for _ in takewhile(lambda x: not x, text_iter(text)):
+        for _ in takewhile(lambda x: not x, iter_strings(text)):
             yield lambda x: x
         # non-empty string is found! capitalize first character
         yield _capfirst
         # keep the rest as is
         yield from repeat(lambda x: x)
 
-    return text.fmap_iter(funcs())
+    return text_fmap_iter(text, funcs())
 
 
 _punctuation_chars = tuple(char for char in string.punctuation)

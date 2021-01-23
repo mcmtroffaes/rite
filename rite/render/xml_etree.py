@@ -8,7 +8,7 @@ from rite.richtext import (
     BaseText, Join, Semantic, FontSize, FontStyle, FontVariant, FontWeight,
     Child, FontStyles
 )
-from rite.richtext.utils import text_iter
+from rite.richtext.utils import iter_strings
 
 
 def escape(value: str) -> str:
@@ -32,7 +32,7 @@ def text_style_property(text: Child) -> Optional[str]:
 @singledispatch
 def render_xml_etree(text: BaseText
                      ) -> Tuple[Optional[str], Iterable[Element]]:
-    return ''.join(map(escape, text_iter(text))), []
+    return ''.join(map(escape, iter_strings(text))), []
 
 
 @render_xml_etree.register(Join)
