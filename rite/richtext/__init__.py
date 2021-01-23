@@ -1,7 +1,7 @@
 import dataclasses
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Callable, List, Iterable, Iterator
+from typing import List, Iterable, Iterator
 
 
 class BaseText(ABC, Iterable["BaseText"]):
