@@ -5,7 +5,7 @@ from typing import Iterable, Optional, List, Tuple
 from xml.etree.ElementTree import Element
 
 from rite.richtext import (
-    BaseText, Join, Semantic, FontSize, FontStyle, FontVariant, FontWeight,
+    Text, Join, Semantic, FontSize, FontStyle, FontVariant, FontWeight,
     Child, FontStyles
 )
 from rite.richtext.utils import text_iter
@@ -30,7 +30,7 @@ def text_style_property(text: Child) -> Optional[str]:
 # generates a string sequence followed by one or more xml elements
 # strings in between elements are in the "tail" attribute of each element
 @singledispatch
-def render_xml_etree(text: BaseText
+def render_xml_etree(text: Text
                      ) -> Tuple[Optional[str], Iterable[Element]]:
     return ''.join(map(escape, text_iter(text))), []
 
