@@ -22,7 +22,14 @@ def _child(text: Child) -> Iterable[str]:
     tag = text.semantic.value if isinstance(text, Semantic) else "span"
     style_property = text_style_property(text)
     if style_property is not None:
-        yield f'<{tag} style="{style_property}">'
+        start = f'<{tag} style="{style_property}">'
+        if start == '<span style="font-weight:700">':
+            start = '<b>'
+            tag = 'b'
+        if start == '<span style="font-style:italic">':
+            start = '<i>'
+            tag = 'i'
+        yield start
     else:
         yield f"<{tag}>"
     yield from render_html(text.child)

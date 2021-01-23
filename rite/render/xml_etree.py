@@ -6,7 +6,7 @@ from xml.etree.ElementTree import Element
 
 from rite.richtext import (
     BaseText, Join, Semantic, FontSize, FontStyle, FontVariant, FontWeight,
-    Child
+    Child, FontStyles
 )
 from rite.richtext.utils import text_iter
 
@@ -67,3 +67,25 @@ def _child(text: Child) -> Tuple[Optional[str], Iterable[Element]]:
     element.text, children = render_xml_etree(text.child)
     element.extend(children)
     return None, [element]
+
+
+@render_xml_etree.register(FontWeight)
+def _font_weight(text: FontWeight) -> Tuple[Optional[str], Iterable[Element]]:
+    if text.font_weight == 700:
+        element = Element('b')
+        element.text, children = render_xml_etree(text.child)
+        element.extend(children)
+        return None, [element]
+    else:
+        return _child(text)
+
+
+@render_xml_etree.register(FontStyle)
+def _font_weight(text: FontStyle) -> Tuple[Optional[str], Iterable[Element]]:
+    if text.font_style == FontStyles.ITALIC:
+        element = Element('i')
+        element.text, children = render_xml_etree(text.child)
+        element.extend(children)
+        return None, [element]
+    else:
+        return _child(text)
