@@ -5,7 +5,7 @@ from typing import List, Iterable, Dict, Optional, Type, Any
 
 from rite.richtext import (
     BaseText, Rich, Join, String, Style,
-    Semantics, FontStyle, FontVariant, FontSize
+    Semantics, FontStyles, FontVariants, FontSizes
 )
 
 
@@ -18,29 +18,29 @@ def _enum_map(enum: Type[Enum]) -> Dict[str, Any]:
 
 
 _semantics_map: Dict[str, Semantics] = _enum_map(Semantics)
-_font_style_map: Dict[str, FontStyle] = _enum_map(FontStyle)
-_font_variant_map: Dict[str, FontVariant] = _enum_map(FontVariant)
-_font_size_map: Dict[str, FontSize] = _enum_map(FontSize)
+_font_style_map: Dict[str, FontStyles] = _enum_map(FontStyles)
+_font_variant_map: Dict[str, FontVariants] = _enum_map(FontVariants)
+_font_size_map: Dict[str, FontSizes] = _enum_map(FontSizes)
 
 
 def element_style(element: Element) -> Style:
     semantics: Optional[Semantics] = _semantics_map.get(element.tag)
-    font_style: FontStyle = \
-        FontStyle.ITALIC if element.tag == 'i' else FontStyle.NORMAL
+    font_style: FontStyles = \
+        FontStyles.ITALIC if element.tag == 'i' else FontStyles.NORMAL
     font_weight: int = 700 if element.tag == 'b' else 400
-    font_variant: FontVariant = FontVariant.NORMAL
-    font_size: FontSize = FontSize.MEDIUM
+    font_variant: FontVariants = FontVariants.NORMAL
+    font_size: FontSizes = FontSizes.MEDIUM
     for prop in element.attrib.get("style", "").split(";"):
         prop_name, _, prop_value = prop.partition(":")
         if prop_name == "font-weight":
             font_weight = int(prop_value)
         elif prop_name == "font-style":
-            font_style = _font_style_map.get(prop_value, FontStyle.NORMAL)
+            font_style = _font_style_map.get(prop_value, FontStyles.NORMAL)
         elif prop_name == "font-variant":
             font_variant = _font_variant_map.get(
-                prop_value, FontVariant.NORMAL)
+                prop_value, FontVariants.NORMAL)
         elif prop_name == "font-size":
-            font_size = _font_size_map.get(prop_value, FontSize.MEDIUM)
+            font_size = _font_size_map.get(prop_value, FontSizes.MEDIUM)
     style = Style(
         semantics=semantics,
         font_weight=font_weight,

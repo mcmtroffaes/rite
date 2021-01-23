@@ -1,7 +1,7 @@
 from functools import singledispatch
 from typing import Iterable, Dict, Tuple, Optional
 
-from rite.richtext import BaseText, Join, Rich, Semantics, Style, FontStyle
+from rite.richtext import BaseText, Join, Rich, Semantics, Style, FontStyles
 from rite.richtext.utils import text_iter
 
 rst_tags: Dict[Semantics, Tuple[str, str]] = {
@@ -27,8 +27,8 @@ def style_rst_tags(style: Style) -> Optional[Tuple[str, str]]:
             return rst_tags[style.semantics]
         except KeyError:
             pass
-    if style.font_style != FontStyle.NORMAL:
-        if style.font_style == FontStyle.ITALIC:
+    if style.font_style != FontStyles.NORMAL:
+        if style.font_style == FontStyles.ITALIC:
             return '*', '*'
     if style.font_weight >= 550:
         return '**', '**'

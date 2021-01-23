@@ -7,7 +7,7 @@ else:
 
 from rite.richtext import (
     BaseText, String, Join, Rich, Style,
-    Semantics, FontSize, FontStyle, FontVariant
+    Semantics, FontSizes, FontStyles, FontVariants
 )
 from rite.richtext.utils import (
     list_join, text_capfirst, text_lower, text_upper, text_capitalize,
@@ -46,11 +46,11 @@ def join(children: List[Node[Data]],
 def rich(
         child: Node[Data],
         semantics: Optional[Semantics] = None,
-        font_size: FontSize = FontSize.MEDIUM,
+        font_size: FontSizes = FontSizes.MEDIUM,
         font_family: Optional[str] = None,
-        font_style: FontStyle = FontStyle.NORMAL,
+        font_style: FontStyles = FontStyles.NORMAL,
         font_weight: int = 400,
-        font_variant: FontVariant = FontVariant.NORMAL,
+        font_variant: FontVariants = FontVariants.NORMAL,
         ) -> Node[Data]:
     """A node which adds a tag to its child."""
     def fmt(data: Data) -> BaseText:

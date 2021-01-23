@@ -5,7 +5,7 @@ from TexSoup.data import TexCmd, BraceGroup, TexExpr, TexEnv
 
 from rite.richtext import (
     BaseText, String, Rich, Join,
-    Style, Semantics, FontSize, FontStyle, FontVariant
+    Style, Semantics, FontSizes, FontStyles, FontVariants
 )
 
 
@@ -22,16 +22,16 @@ style_map: Dict[str, Style] = {
     'subsubsection': Style(Semantics.H4),
     'paragraph': Style(Semantics.H5),
     'subparagraph': Style(Semantics.H6),
-    'scriptsize': Style(font_size=FontSize.XX_SMALL),
-    'footnotesize': Style(font_size=FontSize.X_SMALL),
-    'small': Style(font_size=FontSize.SMALL),
-    'large': Style(font_size=FontSize.LARGE),
-    'Large': Style(font_size=FontSize.X_LARGE),
-    'LARGE': Style(font_size=FontSize.XX_LARGE),
+    'scriptsize': Style(font_size=FontSizes.XX_SMALL),
+    'footnotesize': Style(font_size=FontSizes.X_SMALL),
+    'small': Style(font_size=FontSizes.SMALL),
+    'large': Style(font_size=FontSizes.LARGE),
+    'Large': Style(font_size=FontSizes.X_LARGE),
+    'LARGE': Style(font_size=FontSizes.XX_LARGE),
     'textbf': Style(font_weight=700),
-    'textit': Style(font_style=FontStyle.ITALIC),
-    'textsl': Style(font_style=FontStyle.OBLIQUE),
-    'textsc': Style(font_variant=FontVariant.SMALL_CAPS),
+    'textit': Style(font_style=FontStyles.ITALIC),
+    'textsl': Style(font_style=FontStyles.OBLIQUE),
+    'textsc': Style(font_variant=FontVariants.SMALL_CAPS),
 }
 
 

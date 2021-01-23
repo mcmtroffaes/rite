@@ -5,7 +5,7 @@ from typing import Iterable, Optional, List, Tuple
 from xml.etree.ElementTree import Element
 
 from rite.richtext import (
-    BaseText, Rich, Join, FontStyle, Style, FontVariant, FontSize
+    BaseText, Rich, Join, FontStyles, Style, FontVariants, FontSizes
 )
 from rite.richtext.utils import text_iter
 
@@ -25,8 +25,8 @@ def render_xml_etree(text: BaseText
 def style_properties(style: Style) -> Tuple[str, str]:
     tag: str = 'span' if style.semantics is None else style.semantics.value
     properties: List[str] = []
-    if style.font_style != FontStyle.NORMAL:
-        if tag == 'span' and style.font_style == FontStyle.ITALIC:
+    if style.font_style != FontStyles.NORMAL:
+        if tag == 'span' and style.font_style == FontStyles.ITALIC:
             tag = 'i'
         else:
             properties.append(f"font-style:{style.font_style.value}")
@@ -35,9 +35,9 @@ def style_properties(style: Style) -> Tuple[str, str]:
             tag = 'b'
         else:
             properties.append(f"font-weight:{style.font_weight}")
-    if style.font_size != FontSize.MEDIUM:
+    if style.font_size != FontSizes.MEDIUM:
         properties.append(f"font-size:{style.font_size.value}")
-    if style.font_variant != FontVariant.NORMAL:
+    if style.font_variant != FontVariants.NORMAL:
         properties.append(f"font-variant:{style.font_variant.value}")
     return tag, ';'.join(sorted(properties))  # sort for easier testing
 

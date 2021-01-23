@@ -5,7 +5,7 @@ from typing import Iterable, Dict, Optional, TypeVar
 from TexSoup.data import TexText, TexCmd, BraceGroup, TexExpr
 
 from rite.richtext import (
-    BaseText, Rich, Join, Style, Semantics, FontSize, FontStyle, FontVariant
+    BaseText, Rich, Join, Style, Semantics, FontSizes, FontStyles, FontVariants
 )
 from rite.richtext.utils import text_iter
 
@@ -26,22 +26,22 @@ semantics_map: Dict[Semantics, str] = {
     Semantics.H6: 'subparagraph',
 }
 
-font_size_map: Dict[FontSize, str] = {
-    FontSize.XX_SMALL: 'scriptsize',
-    FontSize.X_SMALL: 'footnotesize',
-    FontSize.SMALL: 'small',
-    FontSize.LARGE: 'large',
-    FontSize.X_LARGE: 'Large',
-    FontSize.XX_LARGE: 'LARGE',
+font_size_map: Dict[FontSizes, str] = {
+    FontSizes.XX_SMALL: 'scriptsize',
+    FontSizes.X_SMALL: 'footnotesize',
+    FontSizes.SMALL: 'small',
+    FontSizes.LARGE: 'large',
+    FontSizes.X_LARGE: 'Large',
+    FontSizes.XX_LARGE: 'LARGE',
 }
 
-font_style_map: Dict[FontStyle, str] = {
-    FontStyle.ITALIC: 'textit',
-    FontStyle.OBLIQUE: 'textsl',
+font_style_map: Dict[FontStyles, str] = {
+    FontStyles.ITALIC: 'textit',
+    FontStyles.OBLIQUE: 'textsl',
 }
 
-font_variant_map: Dict[FontVariant, str] = {
-    FontVariant.SMALL_CAPS: 'textsc',
+font_variant_map: Dict[FontVariants, str] = {
+    FontVariants.SMALL_CAPS: 'textsc',
 }
 
 T = TypeVar('T')

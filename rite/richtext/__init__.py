@@ -63,7 +63,7 @@ class Semantics(Enum):
     PARAGRAPH = 'p'
 
 
-class FontSize(Enum):
+class FontSizes(Enum):
     MEDIUM = 'medium'
     XX_SMALL = 'xx-small'
     X_SMALL = 'x-small'
@@ -73,13 +73,13 @@ class FontSize(Enum):
     XX_LARGE = 'xx-large'
 
 
-class FontStyle(Enum):
+class FontStyles(Enum):
     NORMAL = 'normal'
     ITALIC = 'italic'
     OBLIQUE = 'oblique'
 
 
-class FontVariant(Enum):
+class FontVariants(Enum):
     NORMAL = 'normal'
     SMALL_CAPS = 'small-caps'
 
@@ -87,9 +87,9 @@ class FontVariant(Enum):
 @dataclasses.dataclass(frozen=True)
 class Style:
     semantics: Optional[Semantics] = None
-    font_size: FontSize = FontSize.MEDIUM
-    font_style: FontStyle = FontStyle.NORMAL
-    font_variant: FontVariant = FontVariant.NORMAL
+    font_size: FontSizes = FontSizes.MEDIUM
+    font_style: FontStyles = FontStyles.NORMAL
+    font_variant: FontVariants = FontVariants.NORMAL
     font_weight: int = 400  #: 400 = normal, 700 = bold
 
 

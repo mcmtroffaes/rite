@@ -18,7 +18,7 @@ from rite.render.rst import render_rst
 from rite.render.xml_etree import render_xml_etree
 from rite.richtext import (
     String, Join, BaseText, Style, Rich,
-    Semantics, FontStyle, FontVariant, FontSize
+    Semantics, FontStyles, FontVariants, FontSizes
 )
 from common import _tt, _s, _st, _em, _b, _i
 
@@ -193,7 +193,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 (None, [make_element('i', text='hi')]),
         ),
         (
-                [Rich(_s('hi'), Style(font_style=FontStyle.OBLIQUE))],
+                [Rich(_s('hi'), Style(font_style=FontStyles.OBLIQUE))],
                 'hi',
                 '<span style="font-style:oblique">hi</span>',
                 'hi',
@@ -216,7 +216,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                                      attrib=dict(style='font-weight:900'))]),
         ),
         (
-                [Rich(_s('hi'), Style(font_variant=FontVariant.SMALL_CAPS))],
+                [Rich(_s('hi'), Style(font_variant=FontVariants.SMALL_CAPS))],
                 'hi',
                 '<span style="font-variant:small-caps">hi</span>',
                 'hi',
@@ -228,7 +228,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                     attrib=dict(style='font-variant:small-caps'))]),
         ),
         (
-                [Rich(_s('hi'), Style(font_size=FontSize.XX_LARGE))],
+                [Rich(_s('hi'), Style(font_size=FontSizes.XX_LARGE))],
                 'hi',
                 '<span style="font-size:xx-large">hi</span>',
                 'hi',
@@ -242,9 +242,9 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
         (
                 [Rich(_s('hi'), Style(
                     semantics=Semantics.UNARTICULATED,
-                    font_size=FontSize.XX_LARGE,
-                    font_style=FontStyle.OBLIQUE,
-                    font_variant=FontVariant.SMALL_CAPS,
+                    font_size=FontSizes.XX_LARGE,
+                    font_style=FontStyles.OBLIQUE,
+                    font_variant=FontVariants.SMALL_CAPS,
                     font_weight=300,
                 ))],
                 'hi',
@@ -259,9 +259,9 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                             Rich(
                                 _s('hi'),
                                 Style(semantics=Semantics.UNARTICULATED)),
-                            Style(font_size=FontSize.XX_LARGE)),
-                        Style(font_style=FontStyle.OBLIQUE)),
-                    Style(font_variant=FontVariant.SMALL_CAPS)),
+                            Style(font_size=FontSizes.XX_LARGE)),
+                        Style(font_style=FontStyles.OBLIQUE)),
+                    Style(font_variant=FontVariants.SMALL_CAPS)),
                 (None, [make_element(
                     'u', text='hi',
                     attrib=dict(
