@@ -53,11 +53,6 @@ font_variant_map: Dict[FontVariants, str] = {
 T = TypeVar('T')
 
 
-def optional_iter(x: Optional[T]) -> Iterable[T]:
-    if x is not None:
-        yield x
-
-
 def style_command(text: Child) -> Optional[str]:
     if isinstance(text, Semantic):
         return semantics_map.get(text.semantic)
