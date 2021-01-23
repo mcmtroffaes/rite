@@ -31,7 +31,7 @@ def text_iter(text: BaseText) -> Iterable[str]:
 
 
 @text_iter.register(String)
-def _iter_strings_string(text: String) -> Iterable[str]:
+def _text_iter_string(text: String) -> Iterable[str]:
     yield text.value
 
 
