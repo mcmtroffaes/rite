@@ -253,7 +253,15 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 'hi',
                 'hi',
                 r'\textsc{\textsl{\LARGE{\underline{hi}}}}',
-                None,
+                Rich(
+                    Rich(
+                        Rich(
+                            Rich(
+                                _s('hi'),
+                                Style(semantics=Semantics.UNARTICULATED)),
+                            Style(font_size=FontSize.XX_LARGE)),
+                        Style(font_style=FontStyle.OBLIQUE)),
+                    Style(font_variant=FontVariant.SMALL_CAPS)),
                 (None, [make_element(
                     'u', text='hi',
                     attrib=dict(
