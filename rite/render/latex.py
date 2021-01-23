@@ -5,7 +5,7 @@ from typing import Iterable, Dict, Optional, TypeVar
 from TexSoup.data import TexText, TexCmd, BraceGroup, TexExpr
 
 from rite.richtext import (
-    BaseText, Join, Semantics, FontSizes, FontStyles, FontVariants, Child,
+    Text, Join, Semantics, FontSizes, FontStyles, FontVariants, Child,
     Semantic, FontSize, FontStyle, FontVariant, FontWeight
 )
 from rite.richtext.utils import text_iter
@@ -73,7 +73,7 @@ def style_command(text: Child) -> Optional[str]:
 
 
 @singledispatch
-def render_latex(text: BaseText) -> Iterable[TexExpr]:
+def render_latex(text: Text) -> Iterable[TexExpr]:
     for part in text_iter(text):
         yield TexText(part)
 

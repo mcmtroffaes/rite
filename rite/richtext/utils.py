@@ -3,7 +3,7 @@ from functools import singledispatch
 from itertools import repeat, takewhile
 from typing import Callable, TypeVar, List, Optional, Iterator, Iterable
 
-from rite.richtext import Text, BaseText
+from rite.richtext import Text
 
 T = TypeVar('T')
 
@@ -29,19 +29,19 @@ def text_iter(text: Text) -> Iterable[str]:
             yield from text_iter(child)
 
 
-def text_raw(text: BaseText) -> str:
+def text_raw(text: Text) -> str:
     return ''.join(text_iter(text))
 
 
-def text_is_empty(text: BaseText) -> bool:
+def text_is_empty(text: Text) -> bool:
     return not any(map(bool, text_iter(text)))
 
 
-def text_is_upper(text: BaseText) -> bool:
+def text_is_upper(text: Text) -> bool:
     return text_raw(text).isupper()
 
 
-def text_is_lower(text: BaseText) -> bool:
+def text_is_lower(text: Text) -> bool:
     return text_raw(text).islower()
 
 

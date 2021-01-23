@@ -2,7 +2,7 @@ from functools import singledispatch
 from typing import Iterable, Dict, Tuple, Optional
 
 from rite.richtext import (
-    BaseText, Join, Semantics, FontStyles, Child, Semantic, FontStyle,
+    Text, Join, Semantics, FontStyles, Child, Semantic, FontStyle,
     FontWeight
 )
 from rite.richtext.utils import text_iter
@@ -47,7 +47,7 @@ def style_markdown_tags(text: Child) -> Optional[Tuple[str, str]]:
 
 
 @singledispatch
-def render_markdown(text: BaseText) -> Iterable[str]:
+def render_markdown(text: Text) -> Iterable[str]:
     yield from map(escape, text_iter(text))
 
 

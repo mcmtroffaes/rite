@@ -2,7 +2,7 @@ from typing import Callable, List, Dict
 
 import pytest
 
-from rite.richtext import Join, BaseText
+from rite.richtext import Join, Text
 from rite.richtext.utils import (
     list_join, text_fmap, text_raw, text_is_empty,
     text_is_lower, text_is_upper, text_lower, text_upper,
@@ -21,8 +21,8 @@ from common import _em
         ),
     ])
 def test_text_map(
-        text: BaseText, func: Callable[[str], str],
-        result_functor_map: BaseText, result_raw: str
+        text: Text, func: Callable[[str], str],
+        result_functor_map: Text, result_raw: str
 ):
     assert text_fmap(func, text) == result_functor_map
     assert text_raw(text) == result_raw
@@ -37,7 +37,7 @@ def test_text_map(
     (Join(['']), True),
     (Join(['', 'hello']), False),
 ])
-def test_text_is_empty(text: BaseText, is_empty: bool):
+def test_text_is_empty(text: Text, is_empty: bool):
     assert text_is_empty(text) is is_empty
 
 
@@ -56,7 +56,7 @@ def test_text_is_empty(text: BaseText, is_empty: bool):
     (Join(['HELLO', '', ' WORLD']), False, True),
     (Join(['hello', '', ' WORLD']), False, False),
 ])
-def test_text_is_lower_upper(text: BaseText, is_lower: bool, is_upper: bool):
+def test_text_is_lower_upper(text: Text, is_lower: bool, is_upper: bool):
     assert text_is_lower(text) is is_lower
     assert text_is_upper(text) is is_upper
 
@@ -84,7 +84,7 @@ def test_text_is_lower_upper(text: BaseText, is_lower: bool, is_upper: bool):
             Join(['HELLO', ' WORLD']),
     ),
 ])
-def test_text_lower_upper(text: BaseText, lower: BaseText, upper: BaseText):
+def test_text_lower_upper(text: Text, lower: Text, upper: Text):
     assert text_lower(text) == lower
     assert text_upper(text) == upper
 
@@ -98,7 +98,7 @@ def test_text_lower_upper(text: BaseText, lower: BaseText, upper: BaseText):
     (Join(['', _em('heL'), 'LO']),
      Join(['', _em('Hel'), 'lo'])),
 ])
-def test_text_capitalize(text: BaseText, result: BaseText):
+def test_text_capitalize(text: Text, result: Text):
     assert text_capitalize(text) == result
 
 
@@ -111,7 +111,7 @@ def test_text_capitalize(text: BaseText, result: BaseText):
     (Join(['', _em('heL'), 'LO']),
      Join(['', _em('HeL'), 'LO'])),
 ])
-def test_text_capfirst(text: BaseText, result: BaseText):
+def test_text_capfirst(text: Text, result: Text):
     assert text_capfirst(text) == result
 
 

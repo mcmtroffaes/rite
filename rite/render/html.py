@@ -4,7 +4,7 @@ from functools import singledispatch
 from typing import Iterable
 
 from rite.render.xml_etree import text_style_property
-from rite.richtext import BaseText, Child, Join, Semantic
+from rite.richtext import Text, Child, Join, Semantic
 from rite.richtext.utils import text_iter
 
 
@@ -13,7 +13,7 @@ def escape(value: str) -> str:
 
 
 @singledispatch
-def render_html(text: BaseText) -> Iterable[str]:
+def render_html(text: Text) -> Iterable[str]:
     yield from map(escape, text_iter(text))
 
 
