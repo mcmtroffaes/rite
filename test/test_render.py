@@ -335,6 +335,7 @@ def test_render_latex_new_text() -> None:
 
     assert ''.join(map(str, render_latex(NewText('hi')))) == 'hi'
 
+
 # some extra tests for coverage
 @pytest.mark.parametrize(
     "latex,text", [

@@ -9,9 +9,13 @@ if sys.version_info >= (3, 8):
 else:
     from typing_extensions import Protocol
 
-from rite.richtext import Text, Semantics, Join
+from rite.richtext import (
+    Text, Semantics, Join, FontSizes, FontStyles, FontVariants, FontSize,
+    FontStyle, FontVariant, FontWeight
+)
 from rite.style.template import (
-    Node, str_, join, capfirst, capitalize, lower, upper, semantic
+    Node, str_, join, capfirst, capitalize, lower, upper, semantic, font_size,
+    font_style, font_variant, font_weight
 )
 
 
@@ -90,20 +94,37 @@ def test_protocol() -> None:
 
 
 def test_capfirst() -> None:
-    template: Node = capfirst(join([str_(''), str_data(), str_(' world')]))
+    template: Node[str] = \
+        capfirst(join([str_(''), str_data(), str_(' world')]))
     assert template('hello') == Join(['', _tt('Hello'), ' world'])
 
 
 def test_capitalize() -> None:
-    template: Node = capitalize(join([str_(''), str_data(), str_(' WORLD')]))
+    template: Node[str] = \
+        capitalize(join([str_(''), str_data(), str_(' WORLD')]))
     assert template('heLLo') == Join(['', _tt('Hello'), ' world'])
 
 
 def test_lower() -> None:
-    template: Node = lower(join([str_(''), str_data(), str_(' WORLD')]))
+    template: Node[str] = lower(join([str_(''), str_data(), str_(' WORLD')]))
     assert template('heLLo') == Join(['', _tt('hello'), ' world'])
 
 
 def test_upper() -> None:
-    template: Node = upper(join([str_(''), str_data(), str_(' WORLD')]))
+    template: Node[str] = upper(join([str_(''), str_data(), str_(' WORLD')]))
     assert template('heLLo') == Join(['', _tt('HELLO'), ' WORLD'])
+
+
+def test_style() -> None:
+    template: Node[str] = join([
+        font_size(str_('my'), FontSizes.SMALL),
+        str_(' '), font_style(str_('name'), FontStyles.ITALIC),
+        str_(' '), font_variant(str_('is'), FontVariants.SMALL_CAPS),
+        str_(' '), font_weight(str_data(), 900),
+    ])
+    assert template('merlin') == Join([
+        FontSize('my', FontSizes.SMALL),
+        ' ', FontStyle('name', FontStyles.ITALIC),
+        ' ', FontVariant('is', FontVariants.SMALL_CAPS),
+        ' ', FontWeight(_tt('merlin'), 900),
+    ])

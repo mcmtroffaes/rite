@@ -1,7 +1,7 @@
 from functools import singledispatch
 from typing import Dict, Optional, Callable, List
 
-from TexSoup.data import TexCmd, BraceGroup, TexExpr, TexEnv
+from TexSoup.data import TexCmd, TexExpr, TexEnv
 
 from rite.richtext import (
     Text, Join,
