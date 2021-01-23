@@ -6,9 +6,9 @@ import pytest
 from rite.parse import ParseProtocol
 from rite.plugin import find_plugin
 from rite.render import RenderProtocol
-from rite.richtext import String, Semantic, Semantics
+from rite.richtext import Semantic, Semantics
 
-text = Semantic(String('hi'), Semantics.EMPHASIS)
+text = Semantic('hi', Semantics.EMPHASIS)
 
 
 def test_plugin_bad_group() -> None:

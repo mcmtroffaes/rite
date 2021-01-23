@@ -1,47 +1,47 @@
 from functools import singledispatch
-from typing import Dict, Optional, Callable
+from typing import Dict, Optional, Callable, List
 
 from TexSoup.data import TexCmd, BraceGroup, TexExpr, TexEnv
 
 from rite.richtext import (
-    BaseText, String, Join,
+    Text, BaseText, Join,
     Semantics, FontSizes, FontStyles, FontVariants, Semantic,
     FontSize, FontStyle, FontWeight, FontVariant
 )
 
 
-def semantic_style(semantics: Semantics) -> Callable[[BaseText], BaseText]:
-    def func(child: BaseText) -> BaseText:
+def semantic_style(semantics: Semantics) -> Callable[[Text], Text]:
+    def func(child: Text) -> Text:
         return Semantic(child, semantics)
     return func
 
 
-def font_size_style(font_size: FontSizes) -> Callable[[BaseText], BaseText]:
-    def func(child: BaseText) -> BaseText:
+def font_size_style(font_size: FontSizes) -> Callable[[Text], Text]:
+    def func(child: Text) -> Text:
         return FontSize(child, font_size)
     return func
 
 
-def font_style_style(font_style: FontStyles) -> Callable[[BaseText], BaseText]:
-    def func(child: BaseText) -> BaseText:
+def font_style_style(font_style: FontStyles) -> Callable[[Text], Text]:
+    def func(child: Text) -> Text:
         return FontStyle(child, font_style)
     return func
 
 
 def font_variant_style(font_variant: FontVariants
-                       ) -> Callable[[BaseText], BaseText]:
-    def func(child: BaseText) -> BaseText:
+                       ) -> Callable[[Text], Text]:
+    def func(child: Text) -> Text:
         return FontVariant(child, font_variant)
     return func
 
 
-def font_weight_style(font_weight: int) -> Callable[[BaseText], BaseText]:
-    def func(child: BaseText) -> BaseText:
+def font_weight_style(font_weight: int) -> Callable[[Text], Text]:
+    def func(child: Text) -> Text:
         return FontWeight(child, font_weight)
     return func
 
 
-style_map: Dict[str, Callable[[BaseText], BaseText]] = {
+style_map: Dict[str, Callable[[Text], Text]] = {
     'emph': semantic_style(Semantics.EMPHASIS),
     'textsubscript': semantic_style(Semantics.SUBSCRIPT),
     'textsuperscript': semantic_style(Semantics.SUPERSCRIPT),
@@ -68,33 +68,32 @@ style_map: Dict[str, Callable[[BaseText], BaseText]] = {
 }
 
 
-def _parse_contents(expr: TexExpr) -> BaseText:
-    children = [parse_latex(child) for child in expr.contents]
+def _parse_contents(expr: TexExpr) -> Text:
+    children: List[Text] = [parse_latex(child) for child in expr.contents]
     if not children:
-        return String('')
+        return ''
     elif len(children) == 1:
         return children[0]
-    elif all(isinstance(child, String) for child in children):
-        return String(''.join(
-            child.value for child in children))  # type: ignore
+    elif all(isinstance(child, str) for child in children):
+        return ''.join(child for child in children)  # type: ignore
     else:
         return Join(children)
 
 
 @singledispatch
-def parse_latex(expr: TexExpr) -> BaseText:
-    return String(str(expr))
+def parse_latex(expr: TexExpr) -> Text:
+    return str(expr)
 
 
 @parse_latex.register(TexEnv)
-def _tex_env(expr: TexEnv) -> BaseText:
+def _tex_env(expr: TexEnv) -> Text:
     return _parse_contents(expr)
 
 
 @parse_latex.register(TexCmd)
-def _tex_cmd(expr: TexCmd) -> BaseText:
-    child: BaseText = _parse_contents(expr)
-    style: Optional[Callable[[BaseText], BaseText]] = style_map.get(expr.name)
+def _tex_cmd(expr: TexCmd) -> Text:
+    child: Text = _parse_contents(expr)
+    style: Optional[Callable[[Text], Text]] = style_map.get(expr.name)
     if style is not None:
         return style(child)
     else:
@@ -102,5 +101,5 @@ def _tex_cmd(expr: TexCmd) -> BaseText:
 
 
 @parse_latex.register(BraceGroup)
-def _brace_group(expr: BraceGroup) -> BaseText:
+def _brace_group(expr: BraceGroup) -> Text:
     return _parse_contents(expr)

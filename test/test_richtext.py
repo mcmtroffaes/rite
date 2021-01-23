@@ -6,9 +6,7 @@ from rite.richtext.utils import text_fmap_iter
 
 
 def test_string() -> None:
-    x = _s('hello')
-    assert list(x) == []
-    assert text_fmap_iter(x, repeat(str.capitalize)) == _s('Hello')
+    assert text_fmap_iter('hello', repeat(str.capitalize)) == 'Hello'
 
 
 def test_join() -> None:

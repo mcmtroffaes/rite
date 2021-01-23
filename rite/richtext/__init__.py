@@ -1,49 +1,40 @@
 import dataclasses
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import List, Iterable, Iterator
+from typing import List, Iterable, Iterator, Union
+
+Text = Union["BaseText", str]
 
 
-class BaseText(ABC, Iterable["BaseText"]):
+class BaseText(ABC, Iterable[Text]):
     """Rich text is a collection of strings with some additional formatting
     attached to it.
     """
 
     @abstractmethod
-    def replace(self, children: Iterable["BaseText"]) -> "BaseText":
+    def replace(self, children: Iterable[Text]) -> "BaseText":
         raise NotImplementedError
 
 
 @dataclasses.dataclass(frozen=True)
-class String(BaseText):
-    value: str
-
-    def __iter__(self) -> Iterator["BaseText"]:
-        return iter(())
-
-    def replace(self, children: Iterable["BaseText"]) -> "BaseText":
-        pass
-
-
-@dataclasses.dataclass(frozen=True)
 class Join(BaseText):
-    children: List[BaseText]
+    children: List[Text]
 
-    def __iter__(self) -> Iterator["BaseText"]:
+    def __iter__(self) -> Iterator[Text]:
         return iter(self.children)
 
-    def replace(self, children: Iterable["BaseText"]) -> "BaseText":
+    def replace(self, children: Iterable[Text]) -> "BaseText":
         return dataclasses.replace(self, children=list(children))
 
 
 @dataclasses.dataclass(frozen=True)
 class Child(BaseText):
-    child: BaseText
+    child: Text
 
-    def __iter__(self) -> Iterator["BaseText"]:
+    def __iter__(self) -> Iterator[Text]:
         yield self.child
 
-    def replace(self, children: Iterable["BaseText"]) -> "BaseText":
+    def replace(self, children: Iterable[Text]) -> "BaseText":
         return dataclasses.replace(self, child=next(iter(children)))
 
 

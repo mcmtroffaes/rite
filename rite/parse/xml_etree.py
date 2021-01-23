@@ -4,7 +4,7 @@ from xml.etree.ElementTree import Element
 from typing import List, Iterable, Dict, Optional, Type, Any
 
 from rite.richtext import (
-    BaseText, Join, String,
+    Text, BaseText, Join,
     Semantics, FontStyles, FontVariants, FontSizes, FontSize, Semantic,
     FontStyle, FontVariant, FontWeight
 )
@@ -51,20 +51,20 @@ def element_font_weight(element: Element) -> Optional[int]:
             else (700 if element.tag == 'b' else None))
 
 
-def text_from_list(texts: List[BaseText]) -> BaseText:
+def text_from_list(texts: List[Text]) -> Text:
     if len(texts) == 1:
         return texts[0]
     elif len(texts) > 1:
         return Join(texts)
     else:
-        return String('')
+        return ''
 
 
-def parse_xml_etree(element: Element) -> Iterable[BaseText]:
+def parse_xml_etree(element: Element) -> Iterable[Text]:
     # parse children
-    children: List[BaseText] = []
+    children: List[Text] = []
     if element.text:
-        children.append(String(unescape(element.text)))
+        children.append(unescape(element.text))
     for sub_element in element:
         children.extend(parse_xml_etree(sub_element))
     # embed in rich style if need be
@@ -86,4 +86,4 @@ def parse_xml_etree(element: Element) -> Iterable[BaseText]:
     yield from children
     # return the tail
     if element.tail:
-        yield String(unescape(element.tail))
+        yield unescape(element.tail)

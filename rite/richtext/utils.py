@@ -3,36 +3,30 @@ from functools import singledispatch
 from itertools import repeat, takewhile
 from typing import Callable, TypeVar, List, Optional, Iterator, Iterable
 
-from rite.richtext import BaseText, String
+from rite.richtext import Text, BaseText
 
 T = TypeVar('T')
 
 
-@singledispatch
-def text_fmap_iter(text: BaseText, funcs: Iterator[Callable[[str], str]]
-                   ) -> BaseText:
-    return text.replace(text_fmap_iter(child, funcs) for child in text)
+def text_fmap_iter(text: Text, funcs: Iterator[Callable[[str], str]]
+                   ) -> Text:
+    if isinstance(text, str):
+        return next(funcs)(text)
+    else:
+        return text.replace(text_fmap_iter(child, funcs) for child in text)
 
 
-@text_fmap_iter.register(String)
-def _text_fmap_iter_string(text: String, funcs: Iterator[Callable[[str], str]]
-                           ) -> BaseText:
-    return String(next(funcs)(text.value))
-
-
-def text_fmap(func: Callable[[str], str], text: BaseText) -> BaseText:
+def text_fmap(func: Callable[[str], str], text: Text) -> Text:
     return text_fmap_iter(text, repeat(func))
 
 
 @singledispatch
-def text_iter(text: BaseText) -> Iterable[str]:
-    for child in text:
-        yield from text_iter(child)
-
-
-@text_iter.register(String)
-def _text_iter_string(text: String) -> Iterable[str]:
-    yield text.value
+def text_iter(text: Text) -> Iterable[str]:
+    if isinstance(text, str):
+        yield text
+    else:
+        for child in text:
+            yield from text_iter(child)
 
 
 def text_raw(text: BaseText) -> str:
@@ -51,15 +45,15 @@ def text_is_lower(text: BaseText) -> bool:
     return text_raw(text).islower()
 
 
-def text_upper(text: BaseText) -> BaseText:
+def text_upper(text: Text) -> Text:
     return text_fmap(str.upper, text)
 
 
-def text_lower(text: BaseText) -> BaseText:
+def text_lower(text: Text) -> Text:
     return text_fmap(str.lower, text)
 
 
-def text_capitalize(text: BaseText) -> BaseText:
+def text_capitalize(text: Text) -> Text:
     def funcs() -> Iterator[Callable[[str], str]]:
         # iterate until a non-empty string is found
         for _ in takewhile(lambda x: not x, text_iter(text)):
@@ -71,7 +65,7 @@ def text_capitalize(text: BaseText) -> BaseText:
     return text_fmap_iter(text, funcs())
 
 
-def text_capfirst(text: BaseText) -> BaseText:
+def text_capfirst(text: Text) -> Text:
     def _capfirst(value: str) -> str:
         assert value  # this is guaranteed by the funcs code below
         return value[0].upper() + value[1:]

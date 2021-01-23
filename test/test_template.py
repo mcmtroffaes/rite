@@ -9,7 +9,7 @@ if sys.version_info >= (3, 8):
 else:
     from typing_extensions import Protocol
 
-from rite.richtext import BaseText, String, Semantics, Join
+from rite.richtext import Text, BaseText, Semantics, Join
 from rite.style.template import (
     Node, str_, join, capfirst, capitalize, lower, upper, semantic
 )
@@ -19,7 +19,7 @@ def str_data() -> Node[str]:
     """Simple node for constructing templates that take a string as data.
     This node returns the data marked up as code.
     """
-    def fmt(data: str) -> BaseText:
+    def fmt(data: str) -> Text:
         return _tt(data)
     return fmt
 
@@ -29,8 +29,8 @@ class NameProtocol(Protocol):
 
 
 def name() -> Node[NameProtocol]:
-    def fmt(data: NameProtocol) -> BaseText:
-        return String(data.name)
+    def fmt(data: NameProtocol) -> Text:
+        return data.name
     return fmt
 
 
@@ -39,8 +39,8 @@ class BirthdayProtocol(Protocol):
 
 
 def birthday(fmt: str) -> Node[BirthdayProtocol]:
-    def fmt_(data: BirthdayProtocol) -> BaseText:
-        return String(data.birthday.strftime(fmt))
+    def fmt_(data: BirthdayProtocol) -> Text:
+        return data.birthday.strftime(fmt)
     return fmt_
 
 

@@ -17,7 +17,7 @@ from rite.render.plaintext import render_plaintext
 from rite.render.rst import render_rst
 from rite.render.xml_etree import render_xml_etree
 from rite.richtext import (
-    String, Join, BaseText, Semantics, FontStyles, FontVariants, FontSizes,
+    Text, Join, BaseText, Semantics, FontStyles, FontVariants, FontSizes,
     Semantic, FontWeight, FontStyle, FontVariant, FontSize
 )
 from common import _tt, _s, _st, _em, _b, _i
@@ -40,10 +40,10 @@ def test_protocol() -> None:
 
 def test_protocol_class() -> None:
     class Render:
-        def __call__(self, text: BaseText) -> int:
+        def __call__(self, text: Text) -> int:
             return 123
     render_protocol: RenderProtocol[int] = Render()
-    assert render_protocol(String('')) == 123
+    assert render_protocol('') == 123
 
 
 # should fail mypy
@@ -56,10 +56,10 @@ def test_protocol_bad_arg() -> None:
 
 # should fail mypy
 def test_protocol_bad_rt() -> None:
-    def render(text: BaseText) -> int:
+    def render(text: Text) -> int:
         return 123
     render_protocol: RenderProtocol[str] = render  # type: ignore
-    assert render_protocol(String('')) == 123  # type: ignore
+    assert render_protocol('') == 123  # type: ignore
 
 
 def make_element(tag: str,
@@ -286,9 +286,9 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
         ),
     ])
 def test_render_parse(
-        texts: List[BaseText],
+        texts: List[Text],
         plaintext: str, html: str, markdown: str, rst: str, latex: str,
-        latex_parsed: Optional[BaseText],
+        latex_parsed: Optional[Text],
         xml_etree: Tuple[Optional[str], Iterable[Element]]) -> None:
     assert ''.join(render_plaintext(Join(texts))) == plaintext
     assert ''.join(render_html(Join(texts))) == html
@@ -306,14 +306,14 @@ def test_render_parse(
 # some extra tests for coverage
 @pytest.mark.parametrize(
     "texts,xml_etree", [
-        ([String('he'), String('llo')], ('hello', [])),
-        ([_em('he'), String('ll'), String('o')],
+        (['he', 'llo'], ('hello', [])),
+        ([_em('he'), 'll', 'o'],
          (None, [make_element('em', text='he', tail='llo')])),
         ([_em('')],
          (None, [make_element('em', text='')])),
     ])
 def test_render_xml_etree(
-        texts: List[BaseText],
+        texts: List[Text],
         xml_etree: Tuple[Optional[str], Iterable[Element]]) -> None:
     assert_xml_etree_equal(render_xml_etree(Join(texts)), xml_etree)
 
@@ -324,5 +324,5 @@ def test_render_xml_etree(
         (make_element('em', text=''), [_em('')]),
         (make_element('em'), [_em('')]),
     ])
-def test_parse_xml_etree(element: Element, texts: List[BaseText]) -> None:
+def test_parse_xml_etree(element: Element, texts: List[Text]) -> None:
     assert list(parse_xml_etree(element)) == texts
