@@ -5,7 +5,7 @@ from rite.richtext import (
     BaseText, Join, Semantics, FontStyles, Child,
     Semantic, FontStyle, FontWeight
 )
-from rite.richtext.utils import iter_strings
+from rite.richtext.utils import text_iter
 
 rst_tags: Dict[Semantics, Tuple[str, str]] = {
     Semantics.EMPHASIS: ('*', '*'),
@@ -39,7 +39,7 @@ def style_rst_tags(text: Child) -> Optional[Tuple[str, str]]:
 
 @singledispatch
 def render_rst(text: BaseText) -> Iterable[str]:
-    yield from map(escape, iter_strings(text))
+    yield from map(escape, text_iter(text))
 
 
 @render_rst.register(Child)

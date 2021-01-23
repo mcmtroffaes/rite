@@ -8,7 +8,7 @@ from rite.richtext import (
     BaseText, Join, Semantics, FontSizes, FontStyles, FontVariants, Child,
     Semantic, FontSize, FontStyle, FontVariant, FontWeight
 )
-from rite.richtext.utils import iter_strings
+from rite.richtext.utils import text_iter
 
 
 semantics_map: Dict[Semantics, str] = {
@@ -74,7 +74,7 @@ def style_command(text: Child) -> Optional[str]:
 
 @singledispatch
 def render_latex(text: BaseText) -> Iterable[TexExpr]:
-    for part in iter_strings(text):
+    for part in text_iter(text):
         yield TexText(part)
 
 

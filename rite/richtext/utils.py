@@ -25,22 +25,22 @@ def text_fmap(func: Callable[[str], str], text: BaseText) -> BaseText:
 
 
 @singledispatch
-def iter_strings(text: BaseText) -> Iterable[str]:
+def text_iter(text: BaseText) -> Iterable[str]:
     for child in text:
-        yield from iter_strings(child)
+        yield from text_iter(child)
 
 
-@iter_strings.register(String)
+@text_iter.register(String)
 def _iter_strings_string(text: String) -> Iterable[str]:
     yield text.value
 
 
 def text_raw(text: BaseText) -> str:
-    return ''.join(iter_strings(text))
+    return ''.join(text_iter(text))
 
 
 def text_is_empty(text: BaseText) -> bool:
-    return not any(map(bool, iter_strings(text)))
+    return not any(map(bool, text_iter(text)))
 
 
 def text_is_upper(text: BaseText) -> bool:
@@ -62,7 +62,7 @@ def text_lower(text: BaseText) -> BaseText:
 def text_capitalize(text: BaseText) -> BaseText:
     def funcs() -> Iterator[Callable[[str], str]]:
         # iterate until a non-empty string is found
-        for _ in takewhile(lambda x: not x, iter_strings(text)):
+        for _ in takewhile(lambda x: not x, text_iter(text)):
             yield lambda x: x
         # non-empty string is found! capitalize it
         yield str.capitalize
@@ -78,7 +78,7 @@ def text_capfirst(text: BaseText) -> BaseText:
 
     def funcs() -> Iterator[Callable[[str], str]]:
         # iterate until a non-empty string is found
-        for _ in takewhile(lambda x: not x, iter_strings(text)):
+        for _ in takewhile(lambda x: not x, text_iter(text)):
             yield lambda x: x
         # non-empty string is found! capitalize first character
         yield _capfirst

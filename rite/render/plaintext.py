@@ -1,8 +1,8 @@
 from typing import Iterable
 
 from rite.richtext import BaseText
-from rite.richtext.utils import iter_strings
+from rite.richtext.utils import text_iter
 
 
 def render_plaintext(text: BaseText) -> Iterable[str]:
-    return iter_strings(text)
+    return text_iter(text)
