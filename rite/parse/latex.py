@@ -1,9 +1,12 @@
 from functools import singledispatch
-from typing import Iterable, Dict, Optional, List
+from typing import Dict, Optional
 
 from TexSoup.data import TexCmd, BraceGroup, TexExpr, TexEnv
 
-from rite.richtext import BaseText, Rich, Join, Style, Semantics, FontSize, FontStyle, FontVariant, String
+from rite.richtext import (
+    BaseText, String, Rich, Join,
+    Style, Semantics, FontSize, FontStyle, FontVariant
+)
 
 
 style_map: Dict[str, Style] = {
@@ -39,7 +42,8 @@ def _parse_contents(expr: TexExpr) -> BaseText:
     elif len(children) == 1:
         return children[0]
     elif all(isinstance(child, String) for child in children):
-        return String(''.join(child.value for child in children))
+        return String(''.join(
+            child.value for child in children))  # type: ignore
     else:
         return Join(children)
 
