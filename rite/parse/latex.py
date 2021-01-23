@@ -69,7 +69,7 @@ style_map: Dict[str, Callable[[Text], Text]] = {
 
 
 def _parse_contents(expr: TexExpr) -> Text:
-    children: List[Text] = [parse_latex(child) for child in expr.contents]
+    children: List[Text] = [parse_latex(child) for child in expr.all]
     if not children:
         return ''
     elif len(children) == 1:
@@ -98,8 +98,3 @@ def _tex_cmd(expr: TexCmd) -> Text:
         return style(child)
     else:
         return child
-
-
-@parse_latex.register(BraceGroup)
-def _brace_group(expr: BraceGroup) -> Text:
-    return _parse_contents(expr)

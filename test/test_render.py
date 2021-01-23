@@ -18,7 +18,7 @@ from rite.render.rst import render_rst
 from rite.render.xml_etree import render_xml_etree
 from rite.richtext import (
     Text, Join, Semantics, FontStyles, FontVariants, FontSizes,
-    Semantic, FontWeight, FontStyle, FontVariant, FontSize
+    Semantic, FontWeight, FontStyle, FontVariant, FontSize, Child
 )
 from common import _tt, _st, _em, _b, _i
 
@@ -326,3 +326,25 @@ def test_render_xml_etree(
     ])
 def test_parse_xml_etree(element: Element, texts: List[Text]) -> None:
     assert list(parse_xml_etree(element)) == texts
+
+
+# some extra tests for coverage
+def test_render_latex_new_text() -> None:
+    class NewText(Child):
+        pass
+
+    assert ''.join(map(str, render_latex(NewText('hi')))) == 'hi'
+
+# some extra tests for coverage
+@pytest.mark.parametrize(
+    "latex,text", [
+        (r'\emph{}', _em('')),
+        (r'{hi}', 'hi'),
+        (r'\unknowncommnandxxx{hi}', 'hi'),
+        (r'\unknowncommnandxxx{\emph{hi}}', _em('hi')),
+        (r'{\emph{hi} how is {it going} \textit{today} sir}',
+         Join([_em('hi'), ' how is ', 'it going', ' ', _i('today'), ' sir'])),
+    ])
+def test_render_latex(latex: str, text: Text) -> None:
+    tex_env, _ = TexSoup.read(latex)
+    assert parse_latex(tex_env) == text
