@@ -1,7 +1,7 @@
 # some common helper functions for testing
 from typing import Union, Callable
 
-from rite.richtext import BaseText, String, Rich, Style, Semantics
+from rite.richtext import BaseText, String, Rich, Style, Semantics, FontStyle
 
 
 def _s(value: str) -> BaseText:
@@ -29,3 +29,13 @@ def _em(child: BaseText) -> BaseText:
 @text_or_str
 def _tt(child: BaseText) -> BaseText:
     return Rich(child, Style(semantics=Semantics.CODE))
+
+
+@text_or_str
+def _b(child: BaseText) -> BaseText:
+    return Rich(child, Style(font_weight=700))
+
+
+@text_or_str
+def _i(child: BaseText) -> BaseText:
+    return Rich(child, Style(font_style=FontStyle.ITALIC))
