@@ -5,10 +5,6 @@ from rite.richtext import (
 )
 
 
-def _s(value: str) -> Text:
-    return value
-
-
 def _st(child: Text) -> BaseText:
     return Semantic(child, Semantics.STRONG)
 

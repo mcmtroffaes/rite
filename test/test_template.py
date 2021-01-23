@@ -2,7 +2,7 @@ import dataclasses
 import datetime
 import sys
 
-from common import _tt, _s, _em, _st
+from common import _tt,_em, _st
 
 if sys.version_info >= (3, 8):
     from typing import Protocol
@@ -64,7 +64,7 @@ class PersonWithGender:
 
 def test_template() -> None:
     template: Node[str] = join([str_data(), str_(' world')])
-    assert template('hello') == Join([_tt('hello'), _s(' world')])
+    assert template('hello') == Join([_tt('hello'), ' world'])
 
 
 def test_protocol() -> None:
@@ -81,29 +81,29 @@ def test_protocol() -> None:
     text2 = template(person2)
     assert text1 == Join([
         _em('John'),
-        _s(': '),
+        ': ',
         _st('Mar 07, 1998')])
     assert text2 == Join([
         _em('Mary'),
-        _s(': '),
+        ': ',
         _st('Jun 22, 1997')])
 
 
 def test_capfirst() -> None:
     template: Node = capfirst(join([str_(''), str_data(), str_(' world')]))
-    assert template('hello') == Join([_s(''), _tt('Hello'), _s(' world')])
+    assert template('hello') == Join(['', _tt('Hello'), ' world'])
 
 
 def test_capitalize() -> None:
     template: Node = capitalize(join([str_(''), str_data(), str_(' WORLD')]))
-    assert template('heLLo') == Join([_s(''), _tt('Hello'), _s(' world')])
+    assert template('heLLo') == Join(['', _tt('Hello'), ' world'])
 
 
 def test_lower() -> None:
     template: Node = lower(join([str_(''), str_data(), str_(' WORLD')]))
-    assert template('heLLo') == Join([_s(''), _tt('hello'), _s(' world')])
+    assert template('heLLo') == Join(['', _tt('hello'), ' world'])
 
 
 def test_upper() -> None:
     template: Node = upper(join([str_(''), str_data(), str_(' WORLD')]))
-    assert template('heLLo') == Join([_s(''), _tt('HELLO'), _s(' WORLD')])
+    assert template('heLLo') == Join(['', _tt('HELLO'), ' WORLD'])

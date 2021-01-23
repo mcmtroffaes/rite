@@ -20,7 +20,7 @@ from rite.richtext import (
     Text, Join, Semantics, FontStyles, FontVariants, FontSizes,
     Semantic, FontWeight, FontStyle, FontVariant, FontSize
 )
-from common import _tt, _s, _st, _em, _b, _i
+from common import _tt, _st, _em, _b, _i
 
 
 def test_protocol() -> None:
@@ -107,7 +107,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
 @pytest.mark.parametrize(
     "texts,plaintext,html,markdown,rst,latex,latex_parsed,xml_etree", [
         (
-                [_s('hello '), _em('brave'), _s(' world!')],
+                ['hello ', _em('brave'), ' world!'],
                 'hello brave world!',
                 'hello <em>brave</em> world!',
                 r'hello *brave* world\!',
@@ -118,7 +118,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                     make_element('em', text='brave', tail=' world!')]),
         ),
         (
-                [_s('hello '), _em('"<[*]>"'), _s(' world!')],
+                ['hello ', _em('"<[*]>"'), ' world!'],
                 'hello "<[*]>" world!',
                 'hello <em>&quot;&lt;[*]&gt;&quot;</em> world!',
                 r'hello *"<\[\*\]>"* world\!',
@@ -132,16 +132,16 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
         ),
         (
                 [
-                    _s('hello '), _st('br'), _tt('a'), _s('v'), _em('e'),
-                    _s(' world!'),
+                    'hello ', _st('br'), _tt('a'), 'v', _em('e'),
+                    ' world!',
                 ],
                 'hello brave world!',
                 'hello <strong>br</strong><code>a</code>v<em>e</em> world!',
                 r'hello **br**`a`v*e* world\!',
                 r'hello **br**``a``v*e* world!',
                 r'hello \textbf{br}\texttt{a}v\emph{e} world!',
-                Join([_s('hello '), _b('br'), _tt('a'), _s('v'), _em('e'),
-                      _s(' world!')]),
+                Join(['hello ', _b('br'), _tt('a'), 'v', _em('e'),
+                      ' world!']),
                 ('hello ', [
                     make_element('strong', text='br'),
                     make_element('code', text='a', tail='v'),
@@ -149,13 +149,13 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                     ]),
         ),
         (
-                [_st(Join([_s('h'), _em('e'), _s('l'), _tt('l'), _s('o')]))],
+                [_st(Join(['h', _em('e'), 'l', _tt('l'), 'o']))],
                 'hello',
                 '<strong>h<em>e</em>l<code>l</code>o</strong>',
                 '**h*e*l`l`o**',
                 '**h*e*l``l``o**',
                 r'\textbf{h\emph{e}l\texttt{l}o}',
-                _b(Join([_s('h'), _em('e'), _s('l'), _tt('l'), _s('o')])),
+                _b(Join(['h', _em('e'), 'l', _tt('l'), 'o'])),
                 (None, [
                     make_element('strong', text='h', children=[
                         make_element('em', text='e', tail='l'),
@@ -163,17 +163,17 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                     ])])
         ),
         (
-                [Semantic(_s('hi'), Semantics.MARK)],
+                [Semantic('hi', Semantics.MARK)],
                 'hi',
                 '<mark>hi</mark>',
                 'hi',
                 'hi',
                 'hi',
-                _s('hi'),
+                'hi',
                 (None, [make_element('mark', text='hi')]),
         ),
         (
-                [FontWeight(_s('hi'), 700)],
+                [FontWeight('hi', 700)],
                 'hi',
                 '<b>hi</b>',
                 '**hi**',
@@ -193,7 +193,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 (None, [make_element('i', text='hi')]),
         ),
         (
-                [FontStyle(_s('hi'), FontStyles.OBLIQUE)],
+                [FontStyle('hi', FontStyles.OBLIQUE)],
                 'hi',
                 '<span style="font-style:oblique">hi</span>',
                 'hi',
@@ -205,18 +205,18 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                     attrib=dict(style="font-style:oblique"))]),
         ),
         (
-                [FontWeight(_s('hi'), 900)],
+                [FontWeight('hi', 900)],
                 'hi',
                 '<span style="font-weight:900">hi</span>',
                 '**hi**',
                 '**hi**',
                 r'\textbf{hi}',
-                FontWeight(_s('hi'), 700),
+                FontWeight('hi', 700),
                 (None, [make_element('span', text='hi',
                                      attrib=dict(style='font-weight:900'))]),
         ),
         (
-                [FontVariant(_s('hi'), FontVariants.SMALL_CAPS)],
+                [FontVariant('hi', FontVariants.SMALL_CAPS)],
                 'hi',
                 '<span style="font-variant:small-caps">hi</span>',
                 'hi',
@@ -228,7 +228,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                     attrib=dict(style='font-variant:small-caps'))]),
         ),
         (
-                [FontSize(_s('hi'), FontSizes.XX_LARGE)],
+                [FontSize('hi', FontSizes.XX_LARGE)],
                 'hi',
                 '<span style="font-size:xx-large">hi</span>',
                 'hi',
@@ -244,7 +244,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 FontVariant(
                     FontStyle(
                         FontSize(
-                            Semantic(_s('hi'), Semantics.UNARTICULATED),
+                            Semantic('hi', Semantics.UNARTICULATED),
                             FontSizes.XX_LARGE),
                         FontStyles.OBLIQUE),
                     FontVariants.SMALL_CAPS),
@@ -263,7 +263,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 FontVariant(
                     FontStyle(
                         FontSize(
-                            Semantic(_s('hi'), Semantics.UNARTICULATED),
+                            Semantic('hi', Semantics.UNARTICULATED),
                             FontSizes.XX_LARGE),
                         FontStyles.OBLIQUE),
                     FontVariants.SMALL_CAPS),
