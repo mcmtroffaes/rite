@@ -54,6 +54,7 @@ style_map: Dict[str, Callable[[Text], Text]] = {
     'subsubsection': semantic_style(Semantics.H4),
     'paragraph': semantic_style(Semantics.H5),
     'subparagraph': semantic_style(Semantics.H6),
+    'normalsize': font_size_style(FontSizes.MEDIUM),
     'scriptsize': font_size_style(FontSizes.XX_SMALL),
     'footnotesize': font_size_style(FontSizes.X_SMALL),
     'small': font_size_style(FontSizes.SMALL),
@@ -62,6 +63,8 @@ style_map: Dict[str, Callable[[Text], Text]] = {
     'LARGE': font_size_style(FontSizes.XX_LARGE),
     'textmd': font_weight_style(400),
     'textbf': font_weight_style(700),
+    'textup': lambda text: font_variant_style(
+        FontVariants.NORMAL)(font_style_style(FontStyles.NORMAL)(text)),
     'textit': font_style_style(FontStyles.ITALIC),
     'textsl': font_style_style(FontStyles.OBLIQUE),
     'textsc': font_variant_style(FontVariants.SMALL_CAPS),

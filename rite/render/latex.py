@@ -28,10 +28,10 @@ semantics_map: Dict[Semantics, str] = {
 }
 
 font_size_map: Dict[FontSizes, str] = {
+    FontSizes.MEDIUM: 'normalsize',
     FontSizes.XX_SMALL: 'scriptsize',
     FontSizes.X_SMALL: 'footnotesize',
     FontSizes.SMALL: 'small',
-    FontSizes.MEDIUM: 'normalsize',
     FontSizes.LARGE: 'large',
     FontSizes.X_LARGE: 'Large',
     FontSizes.XX_LARGE: 'LARGE',
