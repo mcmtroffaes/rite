@@ -1,7 +1,8 @@
+import unicodedata
 from functools import singledispatch
 from typing import Dict, Optional, Callable, List
 
-from TexSoup.data import TexCmd, TexExpr, TexEnv
+from TexSoup.data import TexCmd, TexExpr, TexEnv, TexText
 
 from rite.richtext import (
     Text, Join,
@@ -71,8 +72,25 @@ style_map: Dict[str, Callable[[Text], Text]] = {
 }
 
 
+def tex_to_unicode(item: TexExpr) -> TexExpr:
+    if isinstance(item, TexText):
+            return TexText('\u0301')
+
+
 def _parse_contents(expr: TexExpr) -> Text:
-    children: List[Text] = [parse_latex(child) for child in expr.all]
+    contents = [item for item in expr.all]
+    for i in range(len(contents) - 1):
+        if isinstance(contents[i], TexText) \
+                and isinstance(contents[i + 1], TexText):
+            if contents[i] == r"\`" and len(contents[i + 1]) > 0:
+                contents[i] = TexText(unicodedata.normalize(
+                    'NFC', contents[i + 1][0] + '\u0300'))
+                contents[i + 1] = TexText(contents[i + 1][1:])
+            elif contents[i] == r"\'" and len(contents[i + 1]) > 0:
+                contents[i] = TexText(unicodedata.normalize(
+                    'NFC', contents[i + 1][0] + '\u0301'))
+                contents[i + 1] = TexText(contents[i + 1][1:])
+    children: List[Text] = [parse_latex(child) for child in contents]
     if not children:
         return ''
     elif len(children) == 1:

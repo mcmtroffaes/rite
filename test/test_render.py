@@ -345,6 +345,7 @@ def test_render_latex_new_text() -> None:
         (r'\unknowncommnandxxx{\emph{hi}}', _em('hi')),
         (r'{\emph{hi} how is {it going} \textit{today} sir}',
          Join([_em('hi'), ' how is ', 'it going', ' ', _i('today'), ' sir'])),
+        (r"\'el\`eve", 'élève'),
     ])
 def test_render_latex(latex: str, text: Text) -> None:
     tex_env, _ = TexSoup.read(latex)
