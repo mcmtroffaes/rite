@@ -1,7 +1,7 @@
 import dataclasses
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Callable, List, Iterable, Iterator, Optional
+from typing import Callable, List, Iterable, Iterator
 
 
 class BaseText(ABC, Iterable["BaseText"]):
@@ -39,6 +39,17 @@ class Join(BaseText):
     def fmap_iter(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
         children = [child.fmap_iter(funcs) for child in self.children]
         return dataclasses.replace(self, children=children)
+
+
+@dataclasses.dataclass(frozen=True)
+class Child(BaseText):
+    child: BaseText
+
+    def __iter__(self) -> Iterator["BaseText"]:
+        yield self.child
+
+    def fmap_iter(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
+        return dataclasses.replace(self, child=self.child.fmap_iter(funcs))
 
 
 class Semantics(Enum):
@@ -85,21 +96,25 @@ class FontVariants(Enum):
 
 
 @dataclasses.dataclass(frozen=True)
-class Style:
-    semantics: Optional[Semantics] = None
-    font_size: FontSizes = FontSizes.MEDIUM
-    font_style: FontStyles = FontStyles.NORMAL
-    font_variant: FontVariants = FontVariants.NORMAL
-    font_weight: int = 400  #: 400 = normal, 700 = bold
+class Semantic(Child):
+    semantic: Semantics
 
 
 @dataclasses.dataclass(frozen=True)
-class Rich(BaseText):
-    child: BaseText
-    style: Style
+class FontSize(Child):
+    font_size: FontSizes
 
-    def __iter__(self) -> Iterator["BaseText"]:
-        yield self.child
 
-    def fmap_iter(self, funcs: Iterator[Callable[[str], str]]) -> "BaseText":
-        return dataclasses.replace(self, child=self.child.fmap_iter(funcs))
+@dataclasses.dataclass(frozen=True)
+class FontStyle(Child):
+    font_style: FontStyles
+
+
+@dataclasses.dataclass(frozen=True)
+class FontVariant(Child):
+    font_variant: FontVariants
+
+
+@dataclasses.dataclass(frozen=True)
+class FontWeight(Child):
+    font_weight: int  #: 400 = normal, 700 = bold

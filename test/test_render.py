@@ -17,8 +17,8 @@ from rite.render.plaintext import render_plaintext
 from rite.render.rst import render_rst
 from rite.render.xml_etree import render_xml_etree
 from rite.richtext import (
-    String, Join, BaseText, Style, Rich,
-    Semantics, FontStyles, FontVariants, FontSizes
+    String, Join, BaseText, Semantics, FontStyles, FontVariants, FontSizes,
+    Semantic, FontWeight, FontStyle, FontVariant, FontSize
 )
 from common import _tt, _s, _st, _em, _b, _i
 
@@ -163,7 +163,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                     ])])
         ),
         (
-                [Rich(_s('hi'), Style(semantics=Semantics.MARK))],
+                [Semantic(_s('hi'), Semantics.MARK)],
                 'hi',
                 '<mark>hi</mark>',
                 'hi',
@@ -173,7 +173,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 (None, [make_element('mark', text='hi')]),
         ),
         (
-                [Rich(_s('hi'), Style(font_weight=700))],
+                [FontWeight(_s('hi'), 700)],
                 'hi',
                 '<b>hi</b>',
                 '**hi**',
@@ -193,7 +193,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 (None, [make_element('i', text='hi')]),
         ),
         (
-                [Rich(_s('hi'), Style(font_style=FontStyles.OBLIQUE))],
+                [FontStyle(_s('hi'), FontStyles.OBLIQUE)],
                 'hi',
                 '<span style="font-style:oblique">hi</span>',
                 'hi',
@@ -205,18 +205,18 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                     attrib=dict(style="font-style:oblique"))]),
         ),
         (
-                [Rich(_s('hi'), Style(font_weight=900))],
+                [FontWeight(_s('hi'), 900)],
                 'hi',
                 '<span style="font-weight:900">hi</span>',
                 '**hi**',
                 '**hi**',
                 r'\textbf{hi}',
-                Rich(_s('hi'), Style(font_weight=700)),
+                FontWeight(_s('hi'), 700),
                 (None, [make_element('span', text='hi',
                                      attrib=dict(style='font-weight:900'))]),
         ),
         (
-                [Rich(_s('hi'), Style(font_variant=FontVariants.SMALL_CAPS))],
+                [FontVariant(_s('hi'), FontVariants.SMALL_CAPS)],
                 'hi',
                 '<span style="font-variant:small-caps">hi</span>',
                 'hi',
@@ -228,7 +228,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                     attrib=dict(style='font-variant:small-caps'))]),
         ),
         (
-                [Rich(_s('hi'), Style(font_size=FontSizes.XX_LARGE))],
+                [FontSize(_s('hi'), FontSizes.XX_LARGE)],
                 'hi',
                 '<span style="font-size:xx-large">hi</span>',
                 'hi',
@@ -240,28 +240,30 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                     attrib=dict(style='font-size:xx-large'))]),
         ),
         (
-                [Rich(_s('hi'), Style(
-                    semantics=Semantics.UNARTICULATED,
-                    font_size=FontSizes.XX_LARGE,
-                    font_style=FontStyles.OBLIQUE,
-                    font_variant=FontVariants.SMALL_CAPS,
-                    font_weight=300,
-                ))],
+                [FontWeight(
+                    FontVariant(
+                        FontStyle(
+                            FontSize(
+                                Semantic(_s('hi'), Semantics.UNARTICULATED),
+                                FontSizes.XX_LARGE),
+                            FontStyles.OBLIQUE),
+                        FontVariants.SMALL_CAPS),
+                    300)],
                 'hi',
                 '<u style="font-size:xx-large;font-style:oblique;'
                 'font-variant:small-caps;font-weight:300">hi</u>',
                 'hi',
                 'hi',
                 r'\textsc{\textsl{\LARGE{\underline{hi}}}}',
-                Rich(
-                    Rich(
-                        Rich(
-                            Rich(
-                                _s('hi'),
-                                Style(semantics=Semantics.UNARTICULATED)),
-                            Style(font_size=FontSizes.XX_LARGE)),
-                        Style(font_style=FontStyles.OBLIQUE)),
-                    Style(font_variant=FontVariants.SMALL_CAPS)),
+                FontWeight(
+                    FontVariant(
+                        FontStyle(
+                            FontSize(
+                                Semantic(_s('hi'), Semantics.UNARTICULATED),
+                                FontSizes.XX_LARGE),
+                            FontStyles.OBLIQUE),
+                        FontVariants.SMALL_CAPS),
+                    300),
                 (None, [make_element(
                     'u', text='hi',
                     attrib=dict(

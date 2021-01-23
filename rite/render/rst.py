@@ -1,7 +1,10 @@
 from functools import singledispatch
 from typing import Iterable, Dict, Tuple, Optional
 
-from rite.richtext import BaseText, Join, Rich, Semantics, Style, FontStyles
+from rite.richtext import (
+    BaseText, Join, Semantics, FontStyles, Child,
+    Semantic, FontStyle, FontWeight
+)
 from rite.richtext.utils import text_iter
 
 rst_tags: Dict[Semantics, Tuple[str, str]] = {
@@ -21,16 +24,15 @@ def escape(value: str) -> str:
     return value.translate(special_trans)
 
 
-def style_rst_tags(style: Style) -> Optional[Tuple[str, str]]:
-    if style.semantics is not None:
+def style_rst_tags(text: Child) -> Optional[Tuple[str, str]]:
+    if isinstance(text, Semantic):
         try:
-            return rst_tags[style.semantics]
+            return rst_tags[text.semantic]
         except KeyError:
             pass
-    if style.font_style != FontStyles.NORMAL:
-        if style.font_style == FontStyles.ITALIC:
-            return '*', '*'
-    if style.font_weight >= 550:
+    if isinstance(text, FontStyle) and text.font_style == FontStyles.ITALIC:
+        return '*', '*'
+    if isinstance(text, FontWeight) and text.font_weight >= 550:
         return '**', '**'
     return None
 
@@ -40,9 +42,9 @@ def render_rst(text: BaseText) -> Iterable[str]:
     yield from map(escape, text_iter(text))
 
 
-@render_rst.register(Rich)
-def _rich(text: Rich) -> Iterable[str]:
-    tags = style_rst_tags(text.style)
+@render_rst.register(Child)
+def _rich(text: Child) -> Iterable[str]:
+    tags = style_rst_tags(text)
     if tags is not None:
         yield tags[0]
     yield from render_rst(text.child)

@@ -5,7 +5,8 @@ from typing import Iterable, Optional, List, Tuple
 from xml.etree.ElementTree import Element
 
 from rite.richtext import (
-    BaseText, Rich, Join, FontStyles, Style, FontVariants, FontSizes
+    BaseText, Join, Semantic, FontSize, FontStyle, FontVariant, FontWeight,
+    Child
 )
 from rite.richtext.utils import text_iter
 
@@ -14,43 +15,24 @@ def escape(value: str) -> str:
     return html.escape(value)
 
 
+def text_style_property(text: Child) -> Optional[str]:
+    if isinstance(text, FontSize):
+        return f"font-size:{text.font_size.value}"
+    elif isinstance(text, FontStyle):
+        return f"font-style:{text.font_style.value}"
+    elif isinstance(text, FontVariant):
+        return f"font-variant:{text.font_variant.value}"
+    elif isinstance(text, FontWeight):
+        return f"font-weight:{text.font_weight}"
+    return None
+
+
 # generates a string sequence followed by one or more xml elements
 # strings in between elements are in the "tail" attribute of each element
 @singledispatch
 def render_xml_etree(text: BaseText
                      ) -> Tuple[Optional[str], Iterable[Element]]:
     return ''.join(map(escape, text_iter(text))), []
-
-
-def style_properties(style: Style) -> Tuple[str, str]:
-    tag: str = 'span' if style.semantics is None else style.semantics.value
-    properties: List[str] = []
-    if style.font_style != FontStyles.NORMAL:
-        if tag == 'span' and style.font_style == FontStyles.ITALIC:
-            tag = 'i'
-        else:
-            properties.append(f"font-style:{style.font_style.value}")
-    if style.font_weight != 400:
-        if tag == 'span' and style.font_weight == 700:
-            tag = 'b'
-        else:
-            properties.append(f"font-weight:{style.font_weight}")
-    if style.font_size != FontSizes.MEDIUM:
-        properties.append(f"font-size:{style.font_size.value}")
-    if style.font_variant != FontVariants.NORMAL:
-        properties.append(f"font-variant:{style.font_variant.value}")
-    return tag, ';'.join(sorted(properties))  # sort for easier testing
-
-
-@render_xml_etree.register(Rich)
-def _rich(text: Rich) -> Tuple[Optional[str], Iterable[Element]]:
-    tag, properties = style_properties(text.style)
-    element = Element(tag)
-    element.text, children = render_xml_etree(text.child)
-    element.extend(children)
-    if properties:
-        element.attrib["style"] = properties
-    return None, [element]
 
 
 @render_xml_etree.register(Join)
@@ -73,3 +55,15 @@ def _join(text: Join) -> Tuple[Optional[str], Iterable[Element]]:
                     head_text += child_text
         children.extend(child_children)
     return head_text, children
+
+
+@render_xml_etree.register(Child)
+def _child(text: Child) -> Tuple[Optional[str], Iterable[Element]]:
+    element = Element(
+        text.semantic.value if isinstance(text, Semantic) else "span")
+    style_property = text_style_property(text)
+    if style_property is not None:
+        element.attrib["style"] = style_property
+    element.text, children = render_xml_etree(text.child)
+    element.extend(children)
+    return None, [element]

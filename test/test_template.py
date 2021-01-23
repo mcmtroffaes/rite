@@ -11,7 +11,7 @@ else:
 
 from rite.richtext import BaseText, String, Semantics, Join
 from rite.style.template import (
-    Node, rich, str_, join, capfirst, capitalize, lower, upper
+    Node, str_, join, capfirst, capitalize, lower, upper, semantic
 )
 
 
@@ -69,9 +69,9 @@ def test_template() -> None:
 
 def test_protocol() -> None:
     template: Node[PersonProtocol] = join([
-        rich(name(), semantics=Semantics.EMPHASIS),
+        semantic(name(), Semantics.EMPHASIS),
         str_(': '),
-        rich(birthday("%b %d, %Y"), semantics=Semantics.STRONG)])
+        semantic(birthday("%b %d, %Y"), Semantics.STRONG)])
     person1 = Person(
         name='John', birthday=datetime.date(year=1998, month=3, day=7))
     person2 = PersonWithGender(

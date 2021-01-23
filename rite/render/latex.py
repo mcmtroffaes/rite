@@ -5,7 +5,8 @@ from typing import Iterable, Dict, Optional, TypeVar
 from TexSoup.data import TexText, TexCmd, BraceGroup, TexExpr
 
 from rite.richtext import (
-    BaseText, Rich, Join, Style, Semantics, FontSizes, FontStyles, FontVariants
+    BaseText, Join, Semantics, FontSizes, FontStyles, FontVariants, Child,
+    Semantic, FontSize, FontStyle, FontVariant, FontWeight
 )
 from rite.richtext.utils import text_iter
 
@@ -30,17 +31,22 @@ font_size_map: Dict[FontSizes, str] = {
     FontSizes.XX_SMALL: 'scriptsize',
     FontSizes.X_SMALL: 'footnotesize',
     FontSizes.SMALL: 'small',
+    FontSizes.MEDIUM: 'normalsize',
     FontSizes.LARGE: 'large',
     FontSizes.X_LARGE: 'Large',
     FontSizes.XX_LARGE: 'LARGE',
 }
 
+# see https://tex.stackexchange.com/a/5012
 font_style_map: Dict[FontStyles, str] = {
+    FontStyles.NORMAL: 'textup',
     FontStyles.ITALIC: 'textit',
     FontStyles.OBLIQUE: 'textsl',
 }
 
+# see https://tex.stackexchange.com/a/5012
 font_variant_map: Dict[FontVariants, str] = {
+    FontVariants.NORMAL: 'textup',
     FontVariants.SMALL_CAPS: 'textsc',
 }
 
@@ -52,13 +58,18 @@ def optional_iter(x: Optional[T]) -> Iterable[T]:
         yield x
 
 
-def style_commands(style: Style) -> Iterable[str]:
-    if style.semantics is not None:
-        yield from optional_iter(semantics_map.get(style.semantics))
-    yield from optional_iter(font_size_map.get(style.font_size))
-    yield from optional_iter(font_style_map.get(style.font_style))
-    yield from optional_iter(font_variant_map.get(style.font_variant))
-    yield from optional_iter("textbf" if style.font_weight >= 550 else None)
+def style_command(text: Child) -> Optional[str]:
+    if isinstance(text, Semantic):
+        return semantics_map.get(text.semantic)
+    elif isinstance(text, FontSize):
+        return font_size_map.get(text.font_size)
+    elif isinstance(text, FontStyle):
+        return font_style_map.get(text.font_style)
+    elif isinstance(text, FontVariant):
+        return font_variant_map.get(text.font_variant)
+    elif isinstance(text, FontWeight):
+        return "textbf" if text.font_weight >= 550 else "textmd"
+    return None
 
 
 @singledispatch
@@ -67,10 +78,11 @@ def render_latex(text: BaseText) -> Iterable[TexExpr]:
         yield TexText(part)
 
 
-@render_latex.register(Rich)
-def _rich(text: Rich) -> Iterable[TexExpr]:
+@render_latex.register(Child)
+def _child(text: Child) -> Iterable[TexExpr]:
     exprs: Iterable[TexExpr] = render_latex(text.child)
-    for cmd in style_commands(text.style):
+    cmd = style_command(text)
+    if cmd is not None:
         exprs = [TexCmd(cmd, [BraceGroup(*exprs)])]
     yield from exprs
 

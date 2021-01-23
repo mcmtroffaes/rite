@@ -6,8 +6,8 @@ else:
     from typing_extensions import Protocol
 
 from rite.richtext import (
-    BaseText, String, Join, Rich, Style,
-    Semantics, FontSizes, FontStyles, FontVariants
+    BaseText, String, Join, Semantics, FontSizes, FontStyles, FontVariants,
+    Semantic, FontSize, FontStyle, FontVariant, FontWeight
 )
 from rite.richtext.utils import (
     list_join, text_capfirst, text_lower, text_upper, text_capitalize,
@@ -43,24 +43,33 @@ def join(children: List[Node[Data]],
     return fmt
 
 
-def rich(
-        child: Node[Data],
-        semantics: Optional[Semantics] = None,
-        font_size: FontSizes = FontSizes.MEDIUM,
-        font_family: Optional[str] = None,
-        font_style: FontStyles = FontStyles.NORMAL,
-        font_weight: int = 400,
-        font_variant: FontVariants = FontVariants.NORMAL,
-        ) -> Node[Data]:
-    """A node which adds a tag to its child."""
+def semantic(child: Node[Data], style: Semantics) -> Node[Data]:
     def fmt(data: Data) -> BaseText:
-        return Rich(child=child(data), style=Style(
-            semantics=semantics,
-            font_size=font_size,
-            font_style=font_style,
-            font_weight=font_weight,
-            font_variant=font_variant,
-        ))
+        return Semantic(child(data), style)
+    return fmt
+
+
+def font_size(child: Node[Data], style: FontSizes) -> Node[Data]:
+    def fmt(data: Data) -> BaseText:
+        return FontSize(child(data), style)
+    return fmt
+
+
+def font_style(child: Node[Data], style: FontStyles) -> Node[Data]:
+    def fmt(data: Data) -> BaseText:
+        return FontStyle(child(data), style)
+    return fmt
+
+
+def font_variant(child: Node[Data], style: FontVariants) -> Node[Data]:
+    def fmt(data: Data) -> BaseText:
+        return FontVariant(child(data), style)
+    return fmt
+
+
+def font_weight(child: Node[Data], style: int) -> Node[Data]:
+    def fmt(data: Data) -> BaseText:
+        return FontWeight(child(data), style)
     return fmt
 
 

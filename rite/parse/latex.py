@@ -1,37 +1,69 @@
 from functools import singledispatch
-from typing import Dict, Optional
+from typing import Dict, Optional, Callable
 
 from TexSoup.data import TexCmd, BraceGroup, TexExpr, TexEnv
 
 from rite.richtext import (
-    BaseText, String, Rich, Join,
-    Style, Semantics, FontSizes, FontStyles, FontVariants
+    BaseText, String, Join,
+    Semantics, FontSizes, FontStyles, FontVariants, Semantic,
+    FontSize, FontStyle, FontWeight, FontVariant
 )
 
 
-style_map: Dict[str, Style] = {
-    'emph': Style(Semantics.EMPHASIS),
-    'textsubscript': Style(Semantics.SUBSCRIPT),
-    'textsuperscript': Style(Semantics.SUPERSCRIPT),
-    'texttt': Style(Semantics.CODE),
-    'underline': Style(Semantics.UNARTICULATED),
-    'sout': Style(Semantics.STRIKETHROUGH),
-    'chapter': Style(Semantics.H1),
-    'section': Style(Semantics.H2),
-    'subsection': Style(Semantics.H3),
-    'subsubsection': Style(Semantics.H4),
-    'paragraph': Style(Semantics.H5),
-    'subparagraph': Style(Semantics.H6),
-    'scriptsize': Style(font_size=FontSizes.XX_SMALL),
-    'footnotesize': Style(font_size=FontSizes.X_SMALL),
-    'small': Style(font_size=FontSizes.SMALL),
-    'large': Style(font_size=FontSizes.LARGE),
-    'Large': Style(font_size=FontSizes.X_LARGE),
-    'LARGE': Style(font_size=FontSizes.XX_LARGE),
-    'textbf': Style(font_weight=700),
-    'textit': Style(font_style=FontStyles.ITALIC),
-    'textsl': Style(font_style=FontStyles.OBLIQUE),
-    'textsc': Style(font_variant=FontVariants.SMALL_CAPS),
+def semantic_style(semantics: Semantics) -> Callable[[BaseText], BaseText]:
+    def func(child: BaseText) -> BaseText:
+        return Semantic(child, semantics)
+    return func
+
+
+def font_size_style(font_size: FontSizes) -> Callable[[BaseText], BaseText]:
+    def func(child: BaseText) -> BaseText:
+        return FontSize(child, font_size)
+    return func
+
+
+def font_style_style(font_style: FontStyles) -> Callable[[BaseText], BaseText]:
+    def func(child: BaseText) -> BaseText:
+        return FontStyle(child, font_style)
+    return func
+
+
+def font_variant_style(font_variant: FontVariants
+                       ) -> Callable[[BaseText], BaseText]:
+    def func(child: BaseText) -> BaseText:
+        return FontVariant(child, font_variant)
+    return func
+
+
+def font_weight_style(font_weight: int) -> Callable[[BaseText], BaseText]:
+    def func(child: BaseText) -> BaseText:
+        return FontWeight(child, font_weight)
+    return func
+
+
+style_map: Dict[str, Callable[[BaseText], BaseText]] = {
+    'emph': semantic_style(Semantics.EMPHASIS),
+    'textsubscript': semantic_style(Semantics.SUBSCRIPT),
+    'textsuperscript': semantic_style(Semantics.SUPERSCRIPT),
+    'texttt': semantic_style(Semantics.CODE),
+    'underline': semantic_style(Semantics.UNARTICULATED),
+    'sout': semantic_style(Semantics.STRIKETHROUGH),
+    'chapter': semantic_style(Semantics.H1),
+    'section': semantic_style(Semantics.H2),
+    'subsection': semantic_style(Semantics.H3),
+    'subsubsection': semantic_style(Semantics.H4),
+    'paragraph': semantic_style(Semantics.H5),
+    'subparagraph': semantic_style(Semantics.H6),
+    'scriptsize': font_size_style(FontSizes.XX_SMALL),
+    'footnotesize': font_size_style(FontSizes.X_SMALL),
+    'small': font_size_style(FontSizes.SMALL),
+    'large': font_size_style(FontSizes.LARGE),
+    'Large': font_size_style(FontSizes.X_LARGE),
+    'LARGE': font_size_style(FontSizes.XX_LARGE),
+    'textbf': font_weight_style(700),
+    'textit': font_style_style(FontStyles.ITALIC),
+    'textsl': font_style_style(FontStyles.OBLIQUE),
+    'textsc': font_variant_style(FontVariants.SMALL_CAPS),
 }
 
 
@@ -61,9 +93,9 @@ def _tex_env(expr: TexEnv) -> BaseText:
 @parse_latex.register(TexCmd)
 def _tex_cmd(expr: TexCmd) -> BaseText:
     child: BaseText = _parse_contents(expr)
-    style: Optional[Style] = style_map.get(expr.name)
+    style: Optional[Callable[[BaseText], BaseText]] = style_map.get(expr.name)
     if style is not None:
-        return Rich(child, style)
+        return style(child)
     else:
         return child
 
