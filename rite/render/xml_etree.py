@@ -81,7 +81,7 @@ def _font_weight(text: FontWeight) -> Tuple[Optional[str], Iterable[Element]]:
 
 
 @render_xml_etree.register(FontStyle)
-def _font_weight(text: FontStyle) -> Tuple[Optional[str], Iterable[Element]]:
+def _font_style(text: FontStyle) -> Tuple[Optional[str], Iterable[Element]]:
     if text.font_style == FontStyles.ITALIC:
         element = Element('i')
         element.text, children = render_xml_etree(text.child)
