@@ -2,7 +2,7 @@ import dataclasses
 import datetime
 import sys
 
-from common import _tt,_em, _st
+from common import _tt, _em, _st
 
 if sys.version_info >= (3, 8):
     from typing import Protocol
