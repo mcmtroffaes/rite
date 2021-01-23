@@ -4,7 +4,7 @@ from xml.etree.ElementTree import Element
 from typing import List, Iterable, Dict, Optional, Type, Any
 
 from rite.richtext import (
-    Text, BaseText, Join,
+    Text, Join,
     Semantics, FontStyles, FontVariants, FontSizes, FontSize, Semantic,
     FontStyle, FontVariant, FontWeight
 )

@@ -6,7 +6,7 @@ else:
     from typing_extensions import Protocol
 
 from rite.richtext import (
-    Text, BaseText, Join, Semantics, FontSizes, FontStyles, FontVariants,
+    Text, Join, Semantics, FontSizes, FontStyles, FontVariants,
     Semantic, FontSize, FontStyle, FontVariant, FontWeight
 )
 from rite.richtext.utils import (

@@ -17,7 +17,7 @@ from rite.render.plaintext import render_plaintext
 from rite.render.rst import render_rst
 from rite.render.xml_etree import render_xml_etree
 from rite.richtext import (
-    Text, Join, BaseText, Semantics, FontStyles, FontVariants, FontSizes,
+    Text, Join, Semantics, FontStyles, FontVariants, FontSizes,
     Semantic, FontWeight, FontStyle, FontVariant, FontSize
 )
 from common import _tt, _s, _st, _em, _b, _i

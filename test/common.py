@@ -1,5 +1,4 @@
 # some common helper functions for testing
-from typing import Union, Callable
 
 from rite.richtext import (
     Text, BaseText, Semantic, FontWeight, FontStyle, Semantics, FontStyles

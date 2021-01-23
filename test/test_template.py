@@ -9,7 +9,7 @@ if sys.version_info >= (3, 8):
 else:
     from typing_extensions import Protocol
 
-from rite.richtext import Text, BaseText, Semantics, Join
+from rite.richtext import Text, Semantics, Join
 from rite.style.template import (
     Node, str_, join, capfirst, capitalize, lower, upper, semantic
 )

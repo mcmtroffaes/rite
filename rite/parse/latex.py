@@ -4,7 +4,7 @@ from typing import Dict, Optional, Callable, List
 from TexSoup.data import TexCmd, BraceGroup, TexExpr, TexEnv
 
 from rite.richtext import (
-    Text, BaseText, Join,
+    Text, Join,
     Semantics, FontSizes, FontStyles, FontVariants, Semantic,
     FontSize, FontStyle, FontWeight, FontVariant
 )
