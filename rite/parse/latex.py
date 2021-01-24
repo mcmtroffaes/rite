@@ -2,7 +2,8 @@ import unicodedata
 from functools import singledispatch
 from typing import Dict, Optional, Callable, List
 
-from TexSoup.data import TexCmd, TexExpr, TexEnv, TexText
+from TexSoup.data import TexCmd, TexExpr, TexEnv, TexText, BraceGroup
+from TexSoup.utils import Token
 
 from rite.richtext import (
     Text, Join,
@@ -42,6 +43,13 @@ def font_weight_style(font_weight: int) -> Callable[[Text], Text]:
     return func
 
 
+def text_up() -> Callable[[Text], Text]:
+    def func(child: Text) -> Text:
+        return FontVariant(
+            FontStyle(child, FontStyles.NORMAL), FontVariants.NORMAL)
+    return func
+
+
 style_map: Dict[str, Callable[[Text], Text]] = {
     'emph': semantic_style(Semantics.EMPHASIS),
     'textsubscript': semantic_style(Semantics.SUBSCRIPT),
@@ -64,32 +72,47 @@ style_map: Dict[str, Callable[[Text], Text]] = {
     'LARGE': font_size_style(FontSizes.XX_LARGE),
     'textmd': font_weight_style(400),
     'textbf': font_weight_style(700),
-    'textup': lambda text: font_variant_style(
-        FontVariants.NORMAL)(font_style_style(FontStyles.NORMAL)(text)),
+    'textup': text_up(),
     'textit': font_style_style(FontStyles.ITALIC),
     'textsl': font_style_style(FontStyles.OBLIQUE),
     'textsc': font_variant_style(FontVariants.SMALL_CAPS),
 }
 
 
-def tex_to_unicode(item: TexExpr) -> TexExpr:
-    if isinstance(item, TexText):
-            return TexText('\u0301')
+diacritical_marks: Dict[str, str] = {
+    r"\`": "\u0300",
+    r"\'": "\u0301",
+    r"\^": "\u0302",
+    r"\~": "\u0303",
+    r"\=": "\u0304",
+    r'\.': "\u0307",
+    r'\"': "\u0308",
+}
 
 
 def _parse_contents(expr: TexExpr) -> Text:
-    contents = [item for item in expr.all]
+    contents: List[TexExpr] = [item for item in expr.all]
     for i in range(len(contents) - 1):
-        if isinstance(contents[i], TexText) \
-                and isinstance(contents[i + 1], TexText):
-            if contents[i] == r"\`" and len(contents[i + 1]) > 0:
+        item1: TexExpr = contents[i]
+        item2: TexExpr = contents[i + 1]
+        mark = diacritical_marks.get(str(item1)) \
+            if isinstance(item1, TexText) else None
+        if mark is not None:
+            if isinstance(item2, TexText) \
+                    and len(item2) > 0 and item2[0].isalpha():
                 contents[i] = TexText(unicodedata.normalize(
-                    'NFC', contents[i + 1][0] + '\u0300'))
-                contents[i + 1] = TexText(contents[i + 1][1:])
-            elif contents[i] == r"\'" and len(contents[i + 1]) > 0:
-                contents[i] = TexText(unicodedata.normalize(
-                    'NFC', contents[i + 1][0] + '\u0301'))
-                contents[i + 1] = TexText(contents[i + 1][1:])
+                    'NFC', item2[0] + mark))
+                contents[i + 1] = TexText(item2[1:])
+            if isinstance(item2, BraceGroup):
+                item3: Optional[str] = item2.contents[0].text \
+                    if len(item2.contents) == 1 \
+                    and isinstance(item2.contents[0], Token) \
+                    and len(item2.contents[0].text) == 1 \
+                    else None
+                if item3 is not None:
+                    contents[i] = TexText('')
+                    item2.contents = [Token(unicodedata.normalize(
+                        'NFC', item3 + mark))]
     children: List[Text] = [parse_latex(child) for child in contents]
     if not children:
         return ''

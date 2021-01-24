@@ -346,6 +346,11 @@ def test_render_latex_new_text() -> None:
         (r'{\emph{hi} how is {it going} \textit{today} sir}',
          Join([_em('hi'), ' how is ', 'it going', ' ', _i('today'), ' sir'])),
         (r"\'el\`eve", 'élève'),
+        (r"\`o\'o\^o\~o\=o\.o" r'\"o', 'òóôõōȯö'),
+        (r"\'{a}", 'á'),
+        (r"\'{\somecommand}", r"\'"),
+        (r"\textup{hi}",
+         FontVariant(FontStyle('hi', FontStyles.NORMAL), FontVariants.NORMAL)),
     ])
 def test_render_latex(latex: str, text: Text) -> None:
     tex_env, _ = TexSoup.read(latex)
