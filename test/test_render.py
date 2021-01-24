@@ -348,7 +348,7 @@ def test_render_latex_new_text() -> None:
         (r"\'el\`eve", 'élève'),
         (r"\`o\'o\^o\~o\=o\.o" r'\"o', 'òóôõōȯö'),
         (r"\'{a}", 'á'),
-        (r"\'{\somecommand}", r"\'"),
+        (r"\'{\somecommand}", r"´"),
         (r"\textup{hi}",
          FontVariant(FontStyle('hi', FontStyles.NORMAL), FontVariants.NORMAL)),
     ])

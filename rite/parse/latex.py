@@ -1,6 +1,6 @@
 import unicodedata
 from functools import singledispatch
-from typing import Dict, Optional, Callable, List
+from typing import Dict, Optional, Callable, List, Tuple
 
 from TexSoup.data import TexCmd, TexExpr, TexEnv, TexText, BraceGroup
 from TexSoup.utils import Token
@@ -79,14 +79,14 @@ style_map: Dict[str, Callable[[Text], Text]] = {
 }
 
 
-diacritical_marks: Dict[str, str] = {
-    r"\`": "\u0300",
-    r"\'": "\u0301",
-    r"\^": "\u0302",
-    r"\~": "\u0303",
-    r"\=": "\u0304",
-    r'\.': "\u0307",
-    r'\"': "\u0308",
+diacritical_marks: Dict[str, Tuple[str, str]] = {
+    r"\`": ("\u0300", "`"),
+    r"\'": ("\u0301", "´"),
+    r"\^": ("\u0302", "^"),
+    r"\~": ("\u0303", "˜"),
+    r"\=": ("\u0304", "¯"),
+    r'\.': ("\u0307", "·"),
+    r'\"': ("\u0308", "¨"),
 }
 
 
@@ -95,24 +95,23 @@ def _parse_contents(expr: TexExpr) -> Text:
     for i in range(len(contents) - 1):
         item1: TexExpr = contents[i]
         item2: TexExpr = contents[i + 1]
-        mark = diacritical_marks.get(str(item1)) \
+        marks = diacritical_marks.get(str(item1)) \
             if isinstance(item1, TexText) else None
-        if mark is not None:
+        if marks is not None:
             if isinstance(item2, TexText) \
                     and len(item2) > 0 and item2[0].isalpha():
                 contents[i] = TexText(unicodedata.normalize(
-                    'NFC', item2[0] + mark))
+                    'NFC', item2[0] + marks[0]))
                 contents[i + 1] = TexText(item2[1:])
-            if isinstance(item2, BraceGroup):
-                item3: Optional[str] = item2.contents[0].text \
-                    if len(item2.contents) == 1 \
+            elif isinstance(item2, BraceGroup) \
+                    and len(item2.contents) == 1 \
                     and isinstance(item2.contents[0], Token) \
-                    and len(item2.contents[0].text) == 1 \
-                    else None
-                if item3 is not None:
-                    contents[i] = TexText('')
-                    item2.contents = [Token(unicodedata.normalize(
-                        'NFC', item3 + mark))]
+                    and len(item2.contents[0].text) == 1:
+                contents[i] = TexText('')
+                item2.contents = [Token(unicodedata.normalize(
+                    'NFC', item2.contents[0].text + marks[0]))]
+            else:
+                contents[i] = TexText(marks[1])
     children: List[Text] = [parse_latex(child) for child in contents]
     if not children:
         return ''
