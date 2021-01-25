@@ -123,8 +123,9 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 'hello <em>&quot;&lt;[*]&gt;&quot;</em> world!',
                 r'hello *"<\[\*\]>"* world\!',
                 r'hello *"<[\*]>"* world!',
-                r'hello \emph{"<[*]>"} world!',
-                None,
+                r"hello \emph{''\ensuremath{<}[*]\ensuremath{>}''} world!",
+                Join(['hello ', Semantic("''<*>''", Semantics.EMPHASIS),
+                      ' world!']),
                 ('hello ', [
                     make_element(
                         'em',

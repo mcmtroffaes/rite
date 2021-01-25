@@ -2,11 +2,11 @@ from functools import singledispatch
 from itertools import chain
 from typing import Iterable, Dict, Optional, TypeVar
 
-from TexSoup.data import TexText, TexCmd, BraceGroup, TexExpr
+from pylatexenc.latexencode import unicode_to_latex
 
 from rite.richtext import (
     Text, Join, Semantics, FontSizes, FontStyles, FontVariants, Child,
-    Semantic, FontSize, FontStyle, FontVariant, FontWeight
+    Semantic, FontSize, FontStyle, FontVariant, FontWeight, BaseText
 )
 from rite.richtext.utils import text_iter
 
@@ -68,20 +68,21 @@ def style_command(text: Child) -> Optional[str]:
 
 
 @singledispatch
-def render_latex(text: Text) -> Iterable[TexExpr]:
+def render_latex(text: Text) -> Iterable[str]:
     for part in text_iter(text):
-        yield TexText(part)
+        yield unicode_to_latex(part)
+
+
+@render_latex.register(BaseText)
+def _base(text: BaseText) -> Iterable[str]:
+    return chain.from_iterable(map(render_latex, text))
 
 
 @render_latex.register(Child)
-def _child(text: Child) -> Iterable[TexExpr]:
-    exprs: Iterable[TexExpr] = render_latex(text.child)
+def _child(text: Child) -> Iterable[str]:
     cmd = style_command(text)
     if cmd is not None:
-        exprs = [TexCmd(cmd, [BraceGroup(*exprs)])]
-    yield from exprs
-
-
-@render_latex.register(Join)
-def _join(text: Join) -> Iterable[TexExpr]:
-    return chain.from_iterable(map(render_latex, text.children))
+        yield from ["\\", cmd, "{"]
+    yield from render_latex(text.child)
+    if cmd is not None:
+        yield "}"
