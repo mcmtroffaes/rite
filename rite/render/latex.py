@@ -5,7 +5,7 @@ from typing import Iterable, Dict, Optional, TypeVar
 from pylatexenc.latexencode import unicode_to_latex
 
 from rite.richtext import (
-    Text, Join, Semantics, FontSizes, FontStyles, FontVariants, Child,
+    Text, Semantics, FontSizes, FontStyles, FontVariants, Child,
     Semantic, FontSize, FontStyle, FontVariant, FontWeight, BaseText
 )
 from rite.richtext.utils import text_iter
