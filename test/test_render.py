@@ -344,10 +344,11 @@ def test_render_latex_new_text() -> None:
         (r"\'el\`eve", ['é', 'l', 'è', 've']),
         (r"\`o\'o\^o\~o\=o\.o" r'\"o', [char for char in 'òóôõōȯö']),
         (r"\'{a}", ['á']),
-        (r"\'{\somecommand}", [r"´"]),
         (r"\textup{hi}",
          [FontVariant(FontStyle('hi', FontStyles.NORMAL),
                       FontVariants.NORMAL)]),
+        (r"hello % world", [r"hello "]),
+        (r"$\mathbb{C}$", [r"ℂ"]),
     ])
 def test_render_latex(latex: str, texts: List[Text]) -> None:
     assert list(parse_latex(latex)) == texts

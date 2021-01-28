@@ -1,7 +1,7 @@
-import unicodedata
 from functools import singledispatch
-from typing import Dict, Optional, Callable, Iterable, Tuple, List, Iterator
+from typing import Dict, Optional, Callable, Iterable, Iterator
 
+from pylatexenc.latex2text import LatexNodes2Text
 from pylatexenc.latexwalker import (
     LatexWalker, LatexNode, LatexCommentNode, LatexMacroNode, LatexGroupNode,
     LatexCharsNode, LatexSpecialsNode, LatexMathNode,
@@ -92,24 +92,6 @@ style_map_barren: Dict[str, Callable[[Text], Text]] = {
     'LARGE': font_size_style(FontSizes.XX_LARGE),
 }
 
-marks_map: Dict[str, Tuple[str, str]] = {
-    "`": ("\u0300", "`"),
-    "'": ("\u0301", "´"),
-    "^": ("\u0302", "^"),
-    "~": ("\u0303", "˜"),
-    "=": ("\u0304", "¯"),
-    '.': ("\u0307", "˙"),
-    '"': ("\u0308", "¨"),
-    "H": ("\u030b", "˝"),
-    "c": ("\u0327", "¸"),
-    "k": ("\u0328", "˛"),
-    "b": ("\u0331", "_"),
-    "d": ("\u0323", "."),
-    "r": ("\u030a", "˚"),
-    "u": ("\u0306", "˘"),
-    "v": ("\u030c", "ˇ"),
-}
-
 
 def _smart_join(texts: Iterable[Text]) -> Text:
     texts_list = list(texts)
@@ -155,7 +137,7 @@ def parse_latex(source: str) -> Iterable[Text]:
 
 @singledispatch
 def _parse_latex(node: LatexNode) -> Iterable[Text]:
-    raise TypeError(f'cannot handle latex node of type {type(node)}')
+    raise NotImplementedError(f'cannot handle {type(node)}')
 
 
 @_parse_latex.register(LatexCharsNode)
@@ -178,31 +160,17 @@ def _comment(node: LatexCommentNode) -> Iterable[Text]:
     return iter(())
 
 
-def _single_chars_child(args: List[LatexNode]) -> Optional[str]:
-    if len(args) == 1:
-        arg: LatexNode = args[0]
-        if isinstance(arg, LatexCharsNode):
-            return arg.chars if len(arg.chars) == 1 else None
-        elif isinstance(arg, LatexGroupNode):
-            return _single_chars_child(arg.nodelist)
-    return None
-
-
 @_parse_latex.register(LatexMacroNode)
 def _macro(node: LatexMacroNode) -> Iterable[Text]:
 
     style: Optional[Callable[[Text], Text]] = style_map.get(node.macroname)
-    mark: Optional[Tuple[str, str]] = marks_map.get(node.macroname)
-    char: Optional[str] = _single_chars_child(node.nodeargd.argnlist)
     if style is not None and len(node.nodeargd.argnlist) == 1:
         yield style(_smart_join(_parse_latex(node.nodeargd.argnlist[0])))
-    elif mark is not None:
-        if char is not None:
-            yield unicodedata.normalize('NFC', char + mark[0])
-        else:
-            yield mark[1]
     else:
-        return iter(())
+        l2t = LatexNodes2Text()
+        text = l2t.node_to_text(node)
+        if text:
+            yield text
 
 
 @_parse_latex.register(LatexMathNode)
