@@ -56,14 +56,18 @@ T = TypeVar('T')
 def style_command(text: Child) -> Optional[str]:
     if isinstance(text, Semantic):
         return semantics_map.get(text.semantic)
-    elif isinstance(text, FontSize):
-        return font_size_map.get(text.font_size)
     elif isinstance(text, FontStyle):
         return font_style_map.get(text.font_style)
     elif isinstance(text, FontVariant):
         return font_variant_map.get(text.font_variant)
     elif isinstance(text, FontWeight):
         return "textbf" if text.font_weight >= 550 else "textmd"
+    return None
+
+
+def style_macro(text: Child) -> Optional[str]:
+    if isinstance(text, FontSize):
+        return font_size_map.get(text.font_size)
     return None
 
 
@@ -81,8 +85,11 @@ def _base(text: BaseText) -> Iterable[str]:
 @render_latex.register(Child)
 def _child(text: Child) -> Iterable[str]:
     cmd = style_command(text)
+    mac = style_macro(text)
     if cmd is not None:
         yield from ["\\", cmd, "{"]
+    elif mac is not None:
+        yield from ["{", "\\", mac, " "]
     yield from render_latex(text.child)
-    if cmd is not None:
+    if cmd is not None or mac is not None:
         yield "}"

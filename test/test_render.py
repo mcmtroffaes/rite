@@ -2,7 +2,6 @@ from itertools import zip_longest
 from typing import Iterable, List, Tuple, Optional, Dict
 from xml.etree.ElementTree import Element
 
-import TexSoup
 import pytest
 
 from rite.parse import ParseProtocol
@@ -124,25 +123,22 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 r'hello *"<\[\*\]>"* world\!',
                 r'hello *"<[\*]>"* world!',
                 r"hello \emph{''\ensuremath{<}[*]\ensuremath{>}''} world!",
-                Join(['hello ', Semantic("''<*>''", Semantics.EMPHASIS),
-                      ' world!']),
+                ['hello ', Semantic(Join(["''", "<", "[*]", ">", "''"]),
+                                    Semantics.EMPHASIS),
+                 ' world!'],
                 ('hello ', [
                     make_element(
                         'em',
                         text='&quot;&lt;[*]&gt;&quot;', tail=' world!')]),
         ),
         (
-                [
-                    'hello ', _st('br'), _tt('a'), 'v', _em('e'),
-                    ' world!',
-                ],
+                ['hello ', _st('br'), _tt('a'), 'v', _em('e'), ' world!'],
                 'hello brave world!',
                 'hello <strong>br</strong><code>a</code>v<em>e</em> world!',
                 r'hello **br**`a`v*e* world\!',
                 r'hello **br**``a``v*e* world!',
                 r'hello \textbf{br}\texttt{a}v\emph{e} world!',
-                Join(['hello ', _b('br'), _tt('a'), 'v', _em('e'),
-                      ' world!']),
+                ['hello ', FontWeight('br', 700), _tt('a'), 'v', _em('e'), ' world!'],
                 ('hello ', [
                     make_element('strong', text='br'),
                     make_element('code', text='a', tail='v'),
@@ -156,7 +152,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 '**h*e*l`l`o**',
                 '**h*e*l``l``o**',
                 r'\textbf{h\emph{e}l\texttt{l}o}',
-                _b(Join(['h', _em('e'), 'l', _tt('l'), 'o'])),
+                [_b(Join(['h', _em('e'), 'l', _tt('l'), 'o']))],
                 (None, [
                     make_element('strong', text='h', children=[
                         make_element('em', text='e', tail='l'),
@@ -170,7 +166,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 'hi',
                 'hi',
                 'hi',
-                'hi',
+                ['hi'],
                 (None, [make_element('mark', text='hi')]),
         ),
         (
@@ -180,7 +176,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 '**hi**',
                 '**hi**',
                 r'\textbf{hi}',
-                _b('hi'),
+                None,
                 (None, [make_element('b', text='hi')]),
         ),
         (
@@ -212,7 +208,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 '**hi**',
                 '**hi**',
                 r'\textbf{hi}',
-                FontWeight('hi', 700),
+                [_b('hi')],
                 (None, [make_element('span', text='hi',
                                      attrib=dict(style='font-weight:900'))]),
         ),
@@ -234,7 +230,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 '<span style="font-size:xx-large">hi</span>',
                 'hi',
                 'hi',
-                r'\LARGE{hi}',
+                r'{\LARGE hi}',
                 None,
                 (None, [make_element(
                     'span', text='hi',
@@ -259,8 +255,8 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
             '</span></span></span></span>',
             'hi',
             'hi',
-            r'\textmd{\textsc{\textsl{\LARGE{\underline{hi}}}}}',
-            FontWeight(
+            r'\textmd{\textsc{\textsl{{\LARGE \underline{hi}}}}}',
+            [FontWeight(
                 FontVariant(
                     FontStyle(
                         FontSize(
@@ -268,7 +264,7 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                             FontSizes.XX_LARGE),
                         FontStyles.OBLIQUE),
                     FontVariants.SMALL_CAPS),
-                400),
+                400)],
             (None, [make_element(
                 'span', attrib=dict(style="font-weight:300"),
                 children=[make_element(
@@ -298,10 +294,8 @@ def test_render_parse(
     assert ''.join(map(str, render_latex(Join(texts)))) == latex
     assert_xml_etree_equal(render_xml_etree(Join(texts)), xml_etree)
     assert list(parse_html(html)) == texts
-    tex_env, _ = TexSoup.read(latex)
-    assert parse_latex(tex_env) == (
-           latex_parsed if latex_parsed is not None
-           else (texts[0] if len(texts) == 1 else Join(texts)))
+    assert list(parse_latex(latex)) == (
+           latex_parsed if latex_parsed is not None else texts)
 
 
 # some extra tests for coverage
@@ -339,20 +333,19 @@ def test_render_latex_new_text() -> None:
 
 # some extra tests for coverage
 @pytest.mark.parametrize(
-    "latex,text", [
-        (r'\emph{}', _em('')),
-        (r'{hi}', 'hi'),
-        (r'\unknowncommnandxxx{hi}', 'hi'),
-        (r'\unknowncommnandxxx{\emph{hi}}', _em('hi')),
+    "latex,texts", [
+        (r'\emph{}', [_em('')]),
+        (r'{hi}', ['hi']),
+        (r'\unknowncommnandxxx{hi}', ['hi']),
+        (r'\unknowncommnandxxx{\emph{hi}}', [_em('hi')]),
         (r'{\emph{hi} how is {it going} \textit{today} sir}',
-         Join([_em('hi'), ' how is ', 'it going', ' ', _i('today'), ' sir'])),
-        (r"\'el\`eve", 'élève'),
-        (r"\`o\'o\^o\~o\=o\.o" r'\"o', 'òóôõōȯö'),
-        (r"\'{a}", 'á'),
-        (r"\'{\somecommand}", r"´"),
+         [_em('hi'), ' how is ', 'it going', ' ', _i('today'), ' sir']),
+        (r"\'el\`eve", ['é', 'l', 'è', 've']),
+        (r"\`o\'o\^o\~o\=o\.o" r'\"o', [char for char in 'òóôõōȯö']),
+        (r"\'{a}", ['á']),
+        (r"\'{\somecommand}", [r"´"]),
         (r"\textup{hi}",
-         FontVariant(FontStyle('hi', FontStyles.NORMAL), FontVariants.NORMAL)),
+         [FontVariant(FontStyle('hi', FontStyles.NORMAL), FontVariants.NORMAL)]),
     ])
-def test_render_latex(latex: str, text: Text) -> None:
-    tex_env, _ = TexSoup.read(latex)
-    assert parse_latex(tex_env) == text
+def test_render_latex(latex: str, texts: List[Text]) -> None:
+    assert list(parse_latex(latex)) == texts

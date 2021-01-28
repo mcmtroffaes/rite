@@ -1,15 +1,23 @@
 import unicodedata
 from functools import singledispatch
-from typing import Dict, Optional, Callable, List, Tuple
+from itertools import chain
+from typing import Dict, Optional, Callable, Iterable, Tuple, List, Iterator
 
-from TexSoup.data import TexCmd, TexExpr, TexEnv, TexText, BraceGroup
-from TexSoup.utils import Token
+from pylatexenc.latexwalker import LatexWalker, LatexNode, LatexCommentNode, LatexMacroNode, LatexGroupNode, \
+    LatexCharsNode, LatexSpecialsNode, LatexMathNode, get_default_latex_context_db
+from pylatexenc.macrospec import MacroSpec, MacroStandardArgsParser, ParsedMacroArgs, std_macro
 
 from rite.richtext import (
     Text, Join,
     Semantics, FontSizes, FontStyles, FontVariants, Semantic,
     FontSize, FontStyle, FontWeight, FontVariant
 )
+
+
+def no_style() -> Callable[[Text], Text]:
+    def func(child: Text) -> Text:
+        return child
+    return func
 
 
 def semantic_style(semantics: Semantics) -> Callable[[Text], Text]:
@@ -63,6 +71,16 @@ style_map: Dict[str, Callable[[Text], Text]] = {
     'subsubsection': semantic_style(Semantics.H4),
     'paragraph': semantic_style(Semantics.H5),
     'subparagraph': semantic_style(Semantics.H6),
+    'textmd': font_weight_style(400),
+    'textbf': font_weight_style(700),
+    'textup': text_up(),
+    'textit': font_style_style(FontStyles.ITALIC),
+    'textsl': font_style_style(FontStyles.OBLIQUE),
+    'textsc': font_variant_style(FontVariants.SMALL_CAPS),
+    'ensuremath': no_style(),
+}
+
+style_map_barren: Dict[str, Callable[[Text], Text]] = {
     'normalsize': font_size_style(FontSizes.MEDIUM),
     'scriptsize': font_size_style(FontSizes.XX_SMALL),
     'footnotesize': font_size_style(FontSizes.X_SMALL),
@@ -70,26 +88,16 @@ style_map: Dict[str, Callable[[Text], Text]] = {
     'large': font_size_style(FontSizes.LARGE),
     'Large': font_size_style(FontSizes.X_LARGE),
     'LARGE': font_size_style(FontSizes.XX_LARGE),
-    'textmd': font_weight_style(400),
-    'textbf': font_weight_style(700),
-    'textup': text_up(),
-    'textit': font_style_style(FontStyles.ITALIC),
-    'textsl': font_style_style(FontStyles.OBLIQUE),
-    'textsc': font_variant_style(FontVariants.SMALL_CAPS),
 }
 
-
-diacritical_marks: Dict[str, Tuple[str, str]] = {
-    r"\`": ("\u0300", "`"),
-    r"\'": ("\u0301", "´"),
-    r"\^": ("\u0302", "^"),
-    r"\~": ("\u0303", "˜"),
-    r"\=": ("\u0304", "¯"),
-    r'\.': ("\u0307", "˙"),
-    r'\"': ("\u0308", "¨"),
-}
-
-accent_commands: Dict[str, Tuple[str, str]] = {
+marks_map: Dict[str, Tuple[str, str]] = {
+    "`": ("\u0300", "`"),
+    "'": ("\u0301", "´"),
+    "^": ("\u0302", "^"),
+    "~": ("\u0303", "˜"),
+    "=": ("\u0304", "¯"),
+    '.': ("\u0307", "˙"),
+    '"': ("\u0308", "¨"),
     "H": ("\u030b", "˝"),
     "c": ("\u0327", "¸"),
     "k": ("\u0328", "˛"),
@@ -101,54 +109,102 @@ accent_commands: Dict[str, Tuple[str, str]] = {
 }
 
 
-def _parse_contents(expr: TexExpr) -> Text:
-    contents: List[TexExpr] = [item for item in expr.all]
-    for i in range(len(contents) - 1):
-        item1: TexExpr = contents[i]
-        item2: TexExpr = contents[i + 1]
-        marks = diacritical_marks.get(str(item1)) \
-            if isinstance(item1, TexText) else None
-        if marks is not None:
-            if isinstance(item2, TexText) \
-                    and len(item2) > 0 and item2[0].isalpha():
-                contents[i] = TexText(unicodedata.normalize(
-                    'NFC', item2[0] + marks[0]))
-                contents[i + 1] = TexText(item2[1:])
-            elif isinstance(item2, BraceGroup) \
-                    and len(item2.contents) == 1 \
-                    and isinstance(item2.contents[0], Token) \
-                    and len(item2.contents[0].text) == 1:
-                contents[i] = TexText('')
-                item2.contents = [Token(unicodedata.normalize(
-                    'NFC', item2.contents[0].text + marks[0]))]
-            else:
-                contents[i] = TexText(marks[1])
-    children: List[Text] = [parse_latex(child) for child in contents]
-    if not children:
+def _smart_join(texts: Iterable[Text]) -> Text:
+    texts_list = list(texts)
+    if not texts_list:
         return ''
-    elif len(children) == 1:
-        return children[0]
-    elif all(isinstance(child, str) for child in children):
-        return ''.join(child for child in children)  # type: ignore
+    elif len(texts_list) == 1:
+        return texts_list[0]
     else:
-        return Join(children)
+        return Join(texts_list)
+
+
+def _parse_latex_nodes(nodes: Iterator[LatexNode]) -> Iterable[Text]:
+    """Helper function to parse a list of nodes."""
+    node: Optional[LatexNode] = next(nodes, None)
+    while node is not None:
+        if isinstance(node, LatexMacroNode) \
+                and node.macroname in style_map_barren:
+            yield style_map_barren[node.macroname](
+                _smart_join(_parse_latex_nodes(nodes)))
+        else:
+            yield from _parse_latex(node)
+        node = next(nodes, None)
+
+
+def _text_macro_spec(name: str) -> MacroSpec:
+    return MacroSpec(
+        name, args_parser=MacroStandardArgsParser('{', args_math_mode=[False]))
+
+
+def parse_latex(source: str) -> Iterable[Text]:
+    context = get_default_latex_context_db()
+    # add missing macros (will be fixed with pylatexenc > 2.8)
+    context.add_context_category('rite', [
+        _text_macro_spec('textmd'),
+        _text_macro_spec('textup'),
+        _text_macro_spec('textsf'),
+        _text_macro_spec('texttt'),
+        std_macro('underline', False, 1),
+    ])
+    nodes, _, _ = LatexWalker(source, latex_context=context).get_latex_nodes()
+    yield from _parse_latex_nodes(iter(nodes))
 
 
 @singledispatch
-def parse_latex(expr: TexExpr) -> Text:
-    return str(expr)
+def _parse_latex(node: LatexNode) -> Iterable[Text]:
+    raise TypeError(f'cannot handle latex node of type {type(node)}')
 
 
-@parse_latex.register(TexEnv)
-def _tex_env(expr: TexEnv) -> Text:
-    return _parse_contents(expr)
+@_parse_latex.register(LatexCharsNode)
+def _chars_node(node: LatexCharsNode) -> Iterable[Text]:
+    yield node.chars
 
 
-@parse_latex.register(TexCmd)
-def _tex_cmd(expr: TexCmd) -> Text:
-    child: Text = _parse_contents(expr)
-    style: Optional[Callable[[Text], Text]] = style_map.get(expr.name)
-    if style is not None:
-        return style(child)
+@_parse_latex.register(LatexSpecialsNode)
+def _specials_node(node: LatexSpecialsNode) -> Iterable[Text]:
+    yield node.specials_chars
+
+
+@_parse_latex.register(LatexGroupNode)
+def _group_node(node: LatexGroupNode) -> Iterable[Text]:
+    yield from _parse_latex_nodes(iter(node.nodelist))
+
+
+@_parse_latex.register(LatexCommentNode)
+def _comment(node: LatexCommentNode) -> Iterable[Text]:
+    return iter(())
+
+
+def _single_chars_child(args: List[LatexNode]) -> Optional[str]:
+    if len(args) != 1:
+        return None
     else:
-        return child
+        arg: LatexNode = args[0]
+        if isinstance(arg, LatexCharsNode):
+            return arg.chars if len(arg.chars) == 1 else None
+        elif isinstance(arg, LatexGroupNode):
+            return _single_chars_child(arg.nodelist)
+
+
+@_parse_latex.register(LatexMacroNode)
+def _macro(node: LatexMacroNode) -> Iterable[Text]:
+
+    style: Optional[Callable[[Text], Text]] = style_map.get(node.macroname)
+    mark: Optional[Tuple[str, str]] = marks_map.get(node.macroname)
+    char: Optional[str] = _single_chars_child(node.nodeargd.argnlist)
+    if style is not None and len(node.nodeargd.argnlist) == 1:
+        yield style(_smart_join(_parse_latex(node.nodeargd.argnlist[0])))
+    elif mark is not None:
+        if char is not None:
+            yield unicodedata.normalize('NFC', char + mark[0])
+        else:
+            yield mark[1]
+    else:
+        return iter(())
+
+
+@_parse_latex.register(LatexMathNode)
+def _math(node: LatexMathNode) -> Iterable[Text]:
+    for child_node in node.nodelist:
+        yield from _parse_latex(child_node)
