@@ -60,30 +60,31 @@ def text_from_list(texts: List[Text]) -> Text:
         return ''
 
 
-def parse_xml_etree(element: Element) -> Iterable[Text]:
-    # parse children
-    children: List[Text] = []
-    if element.text:
-        children.append(unescape(element.text))
-    for sub_element in element:
-        children.extend(parse_xml_etree(sub_element))
-    # embed in rich style if need be
-    semantic = _semantics_map.get(element.tag)
-    if semantic is not None:
-        children = [Semantic(text_from_list(children), semantic)]
-    font_size = element_font_size(element)
-    if font_size is not None:
-        children = [FontSize(text_from_list(children), font_size)]
-    font_style = element_font_style(element)
-    if font_style is not None:
-        children = [FontStyle(text_from_list(children), font_style)]
-    font_variant = element_font_variant(element)
-    if font_variant is not None:
-        children = [FontVariant(text_from_list(children), font_variant)]
-    font_weight = element_font_weight(element)
-    if font_weight is not None:
-        children = [FontWeight(text_from_list(children), font_weight)]
-    yield from children
-    # return the tail
-    if element.tail:
-        yield unescape(element.tail)
+class ParseXml:
+    def __call__(self, element: Element) -> Iterable[Text]:
+        # parse children
+        children: List[Text] = []
+        if element.text:
+            children.append(unescape(element.text))
+        for sub_element in element:
+            children.extend(self(sub_element))
+        # embed in rich style if need be
+        semantic = _semantics_map.get(element.tag)
+        if semantic is not None:
+            children = [Semantic(text_from_list(children), semantic)]
+        font_size = element_font_size(element)
+        if font_size is not None:
+            children = [FontSize(text_from_list(children), font_size)]
+        font_style = element_font_style(element)
+        if font_style is not None:
+            children = [FontStyle(text_from_list(children), font_style)]
+        font_variant = element_font_variant(element)
+        if font_variant is not None:
+            children = [FontVariant(text_from_list(children), font_variant)]
+        font_weight = element_font_weight(element)
+        if font_weight is not None:
+            children = [FontWeight(text_from_list(children), font_weight)]
+        yield from children
+        # return the tail
+        if element.tail:
+            yield unescape(element.tail)

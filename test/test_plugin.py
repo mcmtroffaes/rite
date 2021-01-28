@@ -23,31 +23,31 @@ def test_plugin_bad_name() -> None:
 
 def test_plugin_render_html() -> None:
     render: RenderProtocol[Iterable[str]] \
-        = find_plugin('rite.render', 'html')
+        = find_plugin('rite.render', 'html')()
     assert ''.join(render(text)) == '<em>hi</em>'
 
 
 def test_plugin_render_markdown() -> None:
     render: RenderProtocol[Iterable[str]] \
-        = find_plugin('rite.render', 'markdown')
+        = find_plugin('rite.render', 'markdown')()
     assert ''.join(render(text)) == '*hi*'
 
 
 def test_plugin_render_plaintext() -> None:
     render: RenderProtocol[Iterable[str]] \
-        = find_plugin('rite.render', 'plaintext')
+        = find_plugin('rite.render', 'plaintext')()
     assert ''.join(render(text)) == 'hi'
 
 
 def test_plugin_render_rst() -> None:
     render: RenderProtocol[Iterable[str]] \
-        = find_plugin('rite.render', 'rst')
+        = find_plugin('rite.render', 'rst')()
     assert ''.join(render(text)) == '*hi*'
 
 
-def test_plugin_render_xml_etree() -> None:
+def test_plugin_render_xml() -> None:
     render: RenderProtocol[Tuple[Optional[str], Iterable[Element]]] \
-        = find_plugin('rite.render', 'xml_etree')
+        = find_plugin('rite.render', 'xml')()
     head, elements = render(text)
     elements = list(elements)
     assert not head
@@ -57,12 +57,12 @@ def test_plugin_render_xml_etree() -> None:
 
 
 def test_plugin_parse_html() -> None:
-    parse: ParseProtocol[str] = find_plugin('rite.parse', 'html')
+    parse: ParseProtocol[str] = find_plugin('rite.parse', 'html')()
     assert list(parse('<em>hi</em>')) == [text]
 
 
-def test_plugin_parse_xml_etree() -> None:
-    parse: ParseProtocol[Element] = find_plugin('rite.parse', 'xml_etree')
+def test_plugin_parse_xml() -> None:
+    parse: ParseProtocol[Element] = find_plugin('rite.parse', 'xml')()
     element = Element('em')
     element.text = 'hi'
     assert list(parse(element)) == [text]

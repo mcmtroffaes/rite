@@ -5,16 +5,16 @@ from xml.etree.ElementTree import Element
 import pytest
 
 from rite.parse import ParseProtocol
-from rite.parse.html import parse_html
+from rite.parse.html import ParseHtml
 from rite.parse.latex import ParseLatex
-from rite.parse.xml_etree import parse_xml_etree
+from rite.parse.xml import ParseXml
 from rite.render import RenderProtocol
-from rite.render.html import render_html
-from rite.render.latex import render_latex
-from rite.render.markdown import render_markdown
-from rite.render.plaintext import render_plaintext
-from rite.render.rst import render_rst
-from rite.render.xml_etree import render_xml_etree
+from rite.render.html import RenderHtml
+from rite.render.latex import RenderLatex
+from rite.render.markdown import RenderMarkdown
+from rite.render.plaintext import RenderPlaintext
+from rite.render.rst import RenderRst
+from rite.render.xml import RenderXml
 from rite.richtext import (
     Text, Join, Semantics, FontStyles, FontVariants, FontSizes,
     Semantic, FontWeight, FontStyle, FontVariant, FontSize, Child
@@ -24,11 +24,11 @@ from common import _tt, _st, _em, _b, _i
 
 def test_protocol() -> None:
     # checks mypy recognizes our renderers as render protocols
-    render_html_protocol: RenderProtocol[Iterable[str]] = render_html
-    render_text_protocol: RenderProtocol[Iterable[str]] = render_plaintext
-    render_markdown_protocol: RenderProtocol[Iterable[str]] = render_markdown
-    render_rst_protocol: RenderProtocol[Iterable[str]] = render_rst
-    parse_html_protocol: ParseProtocol[str] = parse_html
+    render_html_protocol: RenderProtocol[Iterable[str]] = RenderHtml()
+    render_text_protocol: RenderProtocol[Iterable[str]] = RenderPlaintext()
+    render_markdown_protocol: RenderProtocol[Iterable[str]] = RenderMarkdown()
+    render_rst_protocol: RenderProtocol[Iterable[str]] = RenderRst()
+    parse_html_protocol: ParseProtocol[str] = ParseHtml()
     s = _tt('xmas')
     assert ''.join(render_html_protocol(s)) == '<code>xmas</code>'
     assert ''.join(render_text_protocol(s)) == 'xmas'
@@ -288,14 +288,22 @@ def test_render_parse(
         plaintext: str, html: str, markdown: str, rst: str, latex: str,
         latex_parsed: Optional[Text],
         xml_etree: Tuple[Optional[str], Iterable[Element]]) -> None:
+    render_plaintext = RenderPlaintext()
+    render_html = RenderHtml()
+    render_markdown = RenderMarkdown()
+    render_rst = RenderRst()
+    render_latex = RenderLatex()
+    render_xml = RenderXml()
+    parse_html = ParseHtml()
+    parse_latex = ParseLatex()
     assert ''.join(render_plaintext(Join(texts))) == plaintext
     assert ''.join(render_html(Join(texts))) == html
     assert ''.join(render_markdown(Join(texts))) == markdown
     assert ''.join(render_rst(Join(texts))) == rst
     assert ''.join(map(str, render_latex(Join(texts)))) == latex
-    assert_xml_etree_equal(render_xml_etree(Join(texts)), xml_etree)
+    assert_xml_etree_equal(render_xml(Join(texts)), xml_etree)
     assert list(parse_html(html)) == texts
-    assert list(ParseLatex()(latex)) == (
+    assert list(parse_latex(latex)) == (
            latex_parsed if latex_parsed is not None else texts)
 
 
@@ -311,7 +319,8 @@ def test_render_parse(
 def test_render_xml_etree(
         texts: List[Text],
         xml_etree: Tuple[Optional[str], Iterable[Element]]) -> None:
-    assert_xml_etree_equal(render_xml_etree(Join(texts)), xml_etree)
+    render_xml = RenderXml()
+    assert_xml_etree_equal(render_xml(Join(texts)), xml_etree)
 
 
 # some extra tests for coverage
@@ -321,7 +330,8 @@ def test_render_xml_etree(
         (make_element('em'), [_em('')]),
     ])
 def test_parse_xml_etree(element: Element, texts: List[Text]) -> None:
-    assert list(parse_xml_etree(element)) == texts
+    parse_xml = ParseXml()
+    assert list(parse_xml(element)) == texts
 
 
 # some extra tests for coverage
@@ -329,6 +339,7 @@ def test_render_latex_new_text() -> None:
     class NewText(Child):
         pass
 
+    render_latex = RenderLatex()
     assert ''.join(map(str, render_latex(NewText('hi')))) == 'hi'
 
 
@@ -351,4 +362,5 @@ def test_render_latex_new_text() -> None:
         (r"$\mathbb{C}$", [r"ℂ"]),
     ])
 def test_render_latex(latex: str, texts: List[Text]) -> None:
-    assert list(ParseLatex()(latex)) == texts
+    parse_latex = ParseLatex()
+    assert list(parse_latex(latex)) == texts

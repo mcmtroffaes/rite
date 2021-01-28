@@ -47,21 +47,26 @@ def style_markdown_tags(text: Child) -> Optional[Tuple[str, str]]:
 
 
 @singledispatch
-def render_markdown(text: Text) -> Iterable[str]:
+def _render_markdown(text: Text) -> Iterable[str]:
     yield from map(escape, text_iter(text))
 
 
-@render_markdown.register(Child)
+@_render_markdown.register(Child)
 def _child(text: Child) -> Iterable[str]:
     tags = style_markdown_tags(text)
     if tags is not None:
         yield tags[0]
-    yield from render_markdown(text.child)
+    yield from _render_markdown(text.child)
     if tags is not None:
         yield tags[1]
 
 
-@render_markdown.register(Join)
+@_render_markdown.register(Join)
 def _join(text: Join) -> Iterable[str]:
     for child in text.children:
-        yield from render_markdown(child)
+        yield from _render_markdown(child)
+
+
+class RenderMarkdown:
+    def __call__(self, text: Text) -> Iterable[str]:
+        return _render_markdown(text)

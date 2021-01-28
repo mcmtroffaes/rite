@@ -4,5 +4,6 @@ from rite.richtext import Text
 from rite.richtext.utils import text_iter
 
 
-def render_plaintext(text: Text) -> Iterable[str]:
-    return text_iter(text)
+class RenderPlaintext:
+    def __call__(self, text: Text) -> Iterable[str]:
+        return text_iter(text)

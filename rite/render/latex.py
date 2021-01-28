@@ -72,17 +72,17 @@ def style_macro(text: Child) -> Optional[str]:
 
 
 @singledispatch
-def render_latex(text: Text) -> Iterable[str]:
+def _render_latex(text: Text) -> Iterable[str]:
     for part in text_iter(text):
         yield unicode_to_latex(part)
 
 
-@render_latex.register(BaseText)
+@_render_latex.register(BaseText)
 def _base(text: BaseText) -> Iterable[str]:
-    return chain.from_iterable(map(render_latex, text))
+    return chain.from_iterable(map(_render_latex, text))
 
 
-@render_latex.register(Child)
+@_render_latex.register(Child)
 def _child(text: Child) -> Iterable[str]:
     cmd = style_command(text)
     mac = style_macro(text)
@@ -90,6 +90,11 @@ def _child(text: Child) -> Iterable[str]:
         yield from ["\\", cmd, "{"]
     elif mac is not None:
         yield from ["{", "\\", mac, " "]
-    yield from render_latex(text.child)
+    yield from _render_latex(text.child)
     if cmd is not None or mac is not None:
         yield "}"
+
+
+class RenderLatex:
+    def __call__(self, text: Text) -> Iterable[str]:
+        return _render_latex(text)

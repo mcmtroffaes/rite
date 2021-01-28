@@ -9,11 +9,11 @@ def readfile(filename: str) -> List[str]:
 
 
 def render_plugin(name: str) -> str:
-    return f'{name} = rite.render.{name}:render_{name}'
+    return f'{name} = rite.render.{name}:Render{name.capitalize()}'
 
 
 def parse_plugin(name: str) -> str:
-    return f'{name} = rite.parse.{name}:parse_{name}'
+    return f'{name} = rite.parse.{name}:Parse{name.capitalize()}'
 
 
 doclines = readfile("README.rst")
@@ -60,14 +60,16 @@ setup(
     entry_points={
         'rite.render': [
             render_plugin('html'),
+            render_plugin('latex'),
             render_plugin('markdown'),
             render_plugin('plaintext'),
             render_plugin('rst'),
-            render_plugin('xml_etree'),
+            render_plugin('xml'),
         ],
         'rite.parse': [
             parse_plugin('html'),
-            parse_plugin('xml_etree'),
+            parse_plugin('latex'),
+            parse_plugin('xml'),
         ],
     }
 )
