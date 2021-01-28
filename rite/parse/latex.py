@@ -1,13 +1,19 @@
+import dataclasses
 from functools import singledispatch
-from typing import Dict, Optional, Callable, Iterable, Iterator
+from typing import Dict, Optional, Callable, Iterable, Iterator, Any
 
 from pylatexenc.latex2text import LatexNodes2Text
 from pylatexenc.latexwalker import (
     LatexWalker, LatexNode, LatexCommentNode, LatexMacroNode, LatexGroupNode,
     LatexCharsNode, LatexSpecialsNode, LatexMathNode,
-    get_default_latex_context_db
 )
-from pylatexenc.macrospec import MacroSpec, MacroStandardArgsParser, std_macro
+from pylatexenc.latex2text import get_default_latex_context_db \
+    as get_default_latex_text_context_db
+from pylatexenc.latexwalker import get_default_latex_context_db \
+    as get_default_latex_walker_context_db
+from pylatexenc.macrospec import (
+    MacroSpec, MacroStandardArgsParser, std_macro, LatexContextDb
+)
 
 from rite.richtext import (
     Text, Join,
@@ -103,16 +109,17 @@ def _smart_join(texts: Iterable[Text]) -> Text:
         return Join(texts_list)
 
 
-def _parse_latex_nodes(nodes: Iterator[LatexNode]) -> Iterable[Text]:
+def _parse_latex_nodes(nodes: Iterator[LatexNode],
+                       nodes_to_text: LatexNodes2Text) -> Iterable[Text]:
     """Helper function to parse a list of nodes."""
     node: Optional[LatexNode] = next(nodes, None)
     while node is not None:
         if isinstance(node, LatexMacroNode) \
                 and node.macroname in style_map_barren:
             yield style_map_barren[node.macroname](
-                _smart_join(_parse_latex_nodes(nodes)))
+                _smart_join(_parse_latex_nodes(nodes, nodes_to_text)))
         else:
-            yield from _parse_latex(node)
+            yield from _parse_latex(node, nodes_to_text)
         node = next(nodes, None)
 
 
@@ -121,59 +128,92 @@ def _text_macro_spec(name: str) -> MacroSpec:
         name, args_parser=MacroStandardArgsParser('{', args_math_mode=[False]))
 
 
-def parse_latex(source: str) -> Iterable[Text]:
-    context = get_default_latex_context_db()
+def _default_latex_walker_context_db() -> LatexContextDb:
+    latex_walker_context = get_default_latex_walker_context_db()
     # add missing macros (will be fixed with pylatexenc > 2.8)
-    context.add_context_category('rite', [
+    latex_walker_context.add_context_category('rite', [
         _text_macro_spec('textmd'),
         _text_macro_spec('textup'),
         _text_macro_spec('textsf'),
         _text_macro_spec('texttt'),
         std_macro('underline', False, 1),
     ])
-    nodes, _, _ = LatexWalker(source, latex_context=context).get_latex_nodes()
-    yield from _parse_latex_nodes(iter(nodes))
+    return latex_walker_context
+
+
+def _default_latex_text_context_db() -> LatexContextDb:
+    return get_default_latex_text_context_db()
+
+
+@dataclasses.dataclass(frozen=True)
+class ParseLatex:
+    walker_context: LatexContextDb = dataclasses.field(
+        default_factory=_default_latex_walker_context_db)
+    walker_flags: Dict[str, Any] = dataclasses.field(default_factory=dict)
+    nodes_to_text_context: LatexContextDb = dataclasses.field(
+        default_factory=_default_latex_text_context_db)
+    nodes_to_text_flags: Dict[str, Any] = \
+        dataclasses.field(default_factory=dict)
+    nodes_to_text: LatexNodes2Text = dataclasses.field(init=False)
+
+    def __post_init__(self):
+        object.__setattr__(self, "nodes_to_text", LatexNodes2Text(
+            latex_context=self.nodes_to_text_context,
+            **self.nodes_to_text_flags))
+
+    def __call__(self, source: str) -> Iterable[Text]:
+        walker = LatexWalker(
+            source, latex_context=self.walker_context, **self.walker_flags)
+        nodes, _, _ = walker.get_latex_nodes()
+        yield from _parse_latex_nodes(iter(nodes), self.nodes_to_text)
 
 
 @singledispatch
-def _parse_latex(node: LatexNode) -> Iterable[Text]:
+def _parse_latex(node: LatexNode,
+                 nodes_to_text: LatexNodes2Text) -> Iterable[Text]:
     raise NotImplementedError(f'cannot handle {type(node)}')
 
 
 @_parse_latex.register(LatexCharsNode)
-def _chars_node(node: LatexCharsNode) -> Iterable[Text]:
+def _chars_node(node: LatexCharsNode,
+                nodes_to_text: LatexNodes2Text) -> Iterable[Text]:
     yield node.chars
 
 
 @_parse_latex.register(LatexSpecialsNode)
-def _specials_node(node: LatexSpecialsNode) -> Iterable[Text]:
+def _specials_node(node: LatexSpecialsNode,
+                   nodes_to_text: LatexNodes2Text) -> Iterable[Text]:
     yield node.specials_chars
 
 
 @_parse_latex.register(LatexGroupNode)
-def _group_node(node: LatexGroupNode) -> Iterable[Text]:
-    yield from _parse_latex_nodes(iter(node.nodelist))
+def _group_node(node: LatexGroupNode,
+                nodes_to_text: LatexNodes2Text) -> Iterable[Text]:
+    yield from _parse_latex_nodes(iter(node.nodelist), nodes_to_text)
 
 
 @_parse_latex.register(LatexCommentNode)
-def _comment(node: LatexCommentNode) -> Iterable[Text]:
+def _comment(node: LatexCommentNode,
+             nodes_to_text: LatexNodes2Text) -> Iterable[Text]:
     return iter(())
 
 
 @_parse_latex.register(LatexMacroNode)
-def _macro(node: LatexMacroNode) -> Iterable[Text]:
+def _macro(node: LatexMacroNode,
+           nodes_to_text: LatexNodes2Text) -> Iterable[Text]:
 
     style: Optional[Callable[[Text], Text]] = style_map.get(node.macroname)
     if style is not None and len(node.nodeargd.argnlist) == 1:
-        yield style(_smart_join(_parse_latex(node.nodeargd.argnlist[0])))
+        yield style(_smart_join(
+            _parse_latex(node.nodeargd.argnlist[0], nodes_to_text)))
     else:
-        l2t = LatexNodes2Text()
-        text = l2t.node_to_text(node)
+        text = nodes_to_text.node_to_text(node)
         if text:
             yield text
 
 
 @_parse_latex.register(LatexMathNode)
-def _math(node: LatexMathNode) -> Iterable[Text]:
+def _math(node: LatexMathNode,
+          nodes_to_text: LatexNodes2Text) -> Iterable[Text]:
     for child_node in node.nodelist:
-        yield from _parse_latex(child_node)
+        yield from _parse_latex(child_node, nodes_to_text)

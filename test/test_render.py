@@ -6,7 +6,7 @@ import pytest
 
 from rite.parse import ParseProtocol
 from rite.parse.html import parse_html
-from rite.parse.latex import parse_latex
+from rite.parse.latex import ParseLatex
 from rite.parse.xml_etree import parse_xml_etree
 from rite.render import RenderProtocol
 from rite.render.html import render_html
@@ -295,7 +295,7 @@ def test_render_parse(
     assert ''.join(map(str, render_latex(Join(texts)))) == latex
     assert_xml_etree_equal(render_xml_etree(Join(texts)), xml_etree)
     assert list(parse_html(html)) == texts
-    assert list(parse_latex(latex)) == (
+    assert list(ParseLatex()(latex)) == (
            latex_parsed if latex_parsed is not None else texts)
 
 
@@ -351,4 +351,4 @@ def test_render_latex_new_text() -> None:
         (r"$\mathbb{C}$", [r"ℂ"]),
     ])
 def test_render_latex(latex: str, texts: List[Text]) -> None:
-    assert list(parse_latex(latex)) == texts
+    assert list(ParseLatex()(latex)) == texts
