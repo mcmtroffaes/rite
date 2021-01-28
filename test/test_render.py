@@ -138,7 +138,8 @@ def assert_elements_equal(e1: Element, e2: Element) -> None:
                 r'hello **br**`a`v*e* world\!',
                 r'hello **br**``a``v*e* world!',
                 r'hello \textbf{br}\texttt{a}v\emph{e} world!',
-                ['hello ', FontWeight('br', 700), _tt('a'), 'v', _em('e'), ' world!'],
+                ['hello ', FontWeight('br', 700), _tt('a'), 'v', _em('e'),
+                 ' world!'],
                 ('hello ', [
                     make_element('strong', text='br'),
                     make_element('code', text='a', tail='v'),
@@ -345,7 +346,8 @@ def test_render_latex_new_text() -> None:
         (r"\'{a}", ['á']),
         (r"\'{\somecommand}", [r"´"]),
         (r"\textup{hi}",
-         [FontVariant(FontStyle('hi', FontStyles.NORMAL), FontVariants.NORMAL)]),
+         [FontVariant(FontStyle('hi', FontStyles.NORMAL),
+                      FontVariants.NORMAL)]),
     ])
 def test_render_latex(latex: str, texts: List[Text]) -> None:
     assert list(parse_latex(latex)) == texts

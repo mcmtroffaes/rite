@@ -1,11 +1,13 @@
 import unicodedata
 from functools import singledispatch
-from itertools import chain
 from typing import Dict, Optional, Callable, Iterable, Tuple, List, Iterator
 
-from pylatexenc.latexwalker import LatexWalker, LatexNode, LatexCommentNode, LatexMacroNode, LatexGroupNode, \
-    LatexCharsNode, LatexSpecialsNode, LatexMathNode, get_default_latex_context_db
-from pylatexenc.macrospec import MacroSpec, MacroStandardArgsParser, ParsedMacroArgs, std_macro
+from pylatexenc.latexwalker import (
+    LatexWalker, LatexNode, LatexCommentNode, LatexMacroNode, LatexGroupNode,
+    LatexCharsNode, LatexSpecialsNode, LatexMathNode,
+    get_default_latex_context_db
+)
+from pylatexenc.macrospec import MacroSpec, MacroStandardArgsParser, std_macro
 
 from rite.richtext import (
     Text, Join,
@@ -177,14 +179,13 @@ def _comment(node: LatexCommentNode) -> Iterable[Text]:
 
 
 def _single_chars_child(args: List[LatexNode]) -> Optional[str]:
-    if len(args) != 1:
-        return None
-    else:
+    if len(args) == 1:
         arg: LatexNode = args[0]
         if isinstance(arg, LatexCharsNode):
             return arg.chars if len(arg.chars) == 1 else None
         elif isinstance(arg, LatexGroupNode):
             return _single_chars_child(arg.nodelist)
+    return None
 
 
 @_parse_latex.register(LatexMacroNode)
